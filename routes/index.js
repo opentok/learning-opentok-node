@@ -3,8 +3,9 @@ var router = express.Router();
 var LocalStorage = require('node-localstorage').LocalStorage;
 localStorage = new LocalStorage('./rooms');
 
-const apiKey = ''
-const secret = ''
+const apiKey = process.env.API_KEY || ''
+const secret = process.env.API_SECRET || ''
+
 var OpenTok = require('opentok'),
     opentok = new OpenTok(apiKey, secret);
 
