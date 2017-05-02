@@ -9,6 +9,10 @@ const secret = process.env.API_SECRET || ''
 var OpenTok = require('opentok'),
     opentok = new OpenTok(apiKey, secret);
 
+router.get('/', function(req, res, next) {
+  res.render('index', { title: 'Express' });
+});
+
 /**
  * GET /room/:name
  */
@@ -105,10 +109,6 @@ router.post('/room/:name/archive/:archiveId/stop', function(req, res, next) {
  */
 
 /*
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
-
 router.get('/session', function(req, res, next) {
   
   // Create a session that will attempt to transmit streams directly between
