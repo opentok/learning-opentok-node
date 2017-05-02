@@ -1,3 +1,5 @@
+![logo](./tokbox-logo.png)
+
 # Simple OpenTok Server App by Node.js
 
 This simple server app shows yo how to use [OpenTok Node Server SDK](https://tokbox.com/developer/sdks/node/) to create sessions, generate tokens for those sessions, archive (or record) sessions and download those archives.
@@ -74,9 +76,8 @@ router.get('/room/:name', function(req, res, next) {
   }
 });
 ```
-<br>
 
-#### Start an Archive
+#### Start an [Archive](https://tokbox.com/developer/guides/archiving/)
 
 You can only create an archive for sessions that have at least one client connected, the app will respond back an error otherwise. 
 
@@ -106,7 +107,6 @@ router.post('/room/:name/archive/start', function(req, res, next) {
   }
 });
 ```
-<br>
 
 #### Stop an Archive
 
