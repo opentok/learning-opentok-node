@@ -25,7 +25,7 @@ obtain at the [TokBox Dashboard](https://dashboard.tokbox.com/keys).
   1. Once you have cloned the app, `cd` to the root directory.
   2. Run `npm install` command to fetch and install all npm dependecies.
   3. Run `npm start` command to start the app.
-  4. Visit the URL http://localhost:3000 in your browser. You should see a JSON response containing the OpenTok API key, session ID, and token.
+  4. Visit the URL http://localhost:3000/session in your browser. You should see a JSON response containing the OpenTok API key, session ID, and token.
 
 ## Exploring the code 
 
