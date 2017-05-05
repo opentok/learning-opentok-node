@@ -2,7 +2,7 @@
 
 # Simple OpenTok Server App by Node.js
 
-This simple server app shows yo how to use [OpenTok Node Server SDK](https://tokbox.com/developer/sdks/node/) to create sessions, generate tokens for those sessions, archive (or record) sessions and download those archives.
+This simple server app shows you how to use [OpenTok Node Server SDK](https://tokbox.com/developer/sdks/node/) to create sessions, generate tokens for those sessions, archive (or record) sessions and download those archives.
 
 ## Quick deploy to Heroku
 
@@ -22,19 +22,19 @@ obtain at the [TokBox Dashboard](https://dashboard.tokbox.com/keys).
 
 ## Installing && Running on localhost
 
-    1. Once you have cloned the app, `cd` to the root directory.
-    2. Run `npm install` command to fetch and install all npm dependecies.
-    3. Run `npm start` command to start the app.
-    4. Visit the URL http://localhost:3000 in your browser. You should see a JSON response containing the OpenTok API key, session ID, and token.
+  1. Once you have cloned the app, `cd` to the root directory.
+  2. Run `npm install` command to fetch and install all npm dependecies.
+  3. Run `npm start` command to start the app.
+  4. Visit the URL http://localhost:3000/session in your browser. You should see a JSON response containing the OpenTok API key, session ID, and token.
 
 ## Exploring the code 
 
-This simple server app starts off using [Express application generator](https://expressjs.com/en/starter/generator.html) which generates a ready-in-use Node.js server app template so that you can focus on implementation rather than configuration, port setup, and error handling etc. There are a couple things getting created but `routes/index.js` is the only piece we need to pay attention to throughout this README.
+This simple server app starts off using [Express application generator](https://expressjs.com/en/starter/generator.html) which generates a ready-in-use Node.js server app template so that you can focus on implementation rather than configuration, port setup, and error handling etc. There are a couple things getting created but `routes/index.js` is the only piece we need to pay attention to throughout this tutorial.
 
 In order to navigate clients to a designated meeting spot, we associate the [Session ID](https://tokbox.com/developer/guides/basics/#sessions) to a room name which is easier for people to recognize and pass. For simplicity, we use [node-localstorage](https://www.npmjs.com/package/node-localstorage) to implement the association. Basically, [node-localstorage](https://www.npmjs.com/package/node-localstorage) provides a local persistence hash that the key is the room name and the value is the [Session ID](https://tokbox.com/developer/guides/basics/#sessions). For production applications, you might want to configure a database to achieve this functionality.
 <br>
 
-#### Generate/Retrieve a session ID
+#### Generate/Retrieve a Session ID
 
 The `GET /room/:name` route handles the passed room name and performs a check to determine whether the app should generate a new session ID or retrieve from the local persistence. Then, we generate the token by that known session ID. Once API key, session ID, and token are ready, you can respond back all of them in a JSON object.
 
