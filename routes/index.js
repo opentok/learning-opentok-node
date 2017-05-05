@@ -104,67 +104,43 @@ router.post('/room/:name/archive/:archiveId/stop', function(req, res, next) {
   }
 });
 
-/**
- * Old API endpoints
- */
+router.get('/room/:name/archive/:archiveId/view', function(req, res, next) {
+  var roomName = req.params.name;
+  var archiveId = req.params.archiveId;
+  if (localStorage.getItem(roomName) !== null) {
 
-/*
-router.get('/session', function(req, res, next) {
-  
-  // Create a session that will attempt to transmit streams directly between
-  // clients. If clients cannot connect, the session uses the OpenTok TURN server:
-  opentok.createSession({mediaMode:"routed"}, function(err, session) {
-    if (err) {
-      console.log(err);
-      res.status(500).send({error: 'createSession error:', err});
-      return;
-    }
-    token = opentok.generateToken(session.sessionId);
-    res.send({
-      "apiKey": '',
-      "sessionId": session.sessionId,
-      "token": token
+    // fetch an exiting sessionId
+    const sessionId = localStorage.getItem(roomName)
+    console.log('attempting to view archive on session: ' + sessionId);
+    
+    // fetch archive
+    opentok.getArchive(archiveId, function(err, archive) {
+      if (err) {
+        console.log(err);
+        res.status(500).send({error: 'viewArchive error:', err});
+        return;
+      }
+
+      // return if sessionId does not match
+      if (archive.sessionId !== sessionId) {
+        const err = new Error("${roomName} does not own this archive");
+        res.status(500).send({error: 'viewArchive error:', err});
+        return;
+      }
+
+      // extract as a JSON object
+      const json = Object.keys(archive).reduce((json, key) => {
+        json[key] = archive[key];
+        return json;
+      }, {});
+
+      res.send(json);
     });
-  });
+  }
+  else {
+    const err = new Error("${roomName} does not exist");
+    res.status(500).send({error: 'viewArchive error:', err});
+  }
 });
-
-router.post('/start/:sessionId', function(req, res, next) {
-  var sessionId = req.params.sessionId;
-  console.log(sessionId);
-  opentok.startArchive(sessionId, { name: 'Important Presentation' }, function(err, archive) {
-    if (err) {
-      console.log(err);
-      res.status(500).send({error: 'startArchive error:', err});
-      return;
-    }
-    res.send(archive);
-  });
-});
-
-router.post('/stop/:archiveId', function(req, res, next) {
-  var archiveId = req.params.archiveId;
-  console.log('attempting to stop archiveId: ' + archiveId);
-  opentok.stopArchive(archiveId, function(err, archive) {
-    if (err) {
-      console.log(err);
-      res.status(500).send({error: 'stopArchive error:', err});
-      return;
-    }
-    res.send(archive);
-  });
-});
-
-router.get('/view/:archiveId', function(req, res, next) {
-  var archiveId = req.params.archiveId;
-  opentok.getArchive(archiveId, function(err, archive) {
-    if (err) {
-      console.log(err);
-      res.status(500).send({error: 'viewArchive error:', err});
-      return;
-    }
-    res.send(archive);
-  });
-});
-*/
 
 module.exports = router;
