@@ -14,6 +14,28 @@ router.get('/', function(req, res, next) {
 });
 
 /**
+ * GET /session
+ */
+router.get('/session', function(req, res, next) { 
+   
+  // Create a session that will attempt to transmit streams directly between 
+  // clients. If clients cannot connect, the session uses the OpenTok TURN server: 
+  opentok.createSession({mediaMode:"routed"}, function(err, session) { 
+    if (err) { 
+      console.log(err); 
+      res.status(500).send({error: 'createSession error:', err}); 
+      return; 
+    } 
+    token = opentok.generateToken(session.sessionId); 
+    res.send({ 
+      "apiKey": '', 
+      "sessionId": session.sessionId, 
+      "token": token 
+    }); 
+  }); 
+}); 
+
+/**
  * GET /room/:name
  */
 router.get('/room/:name', function(req, res, next) {
@@ -76,14 +98,14 @@ router.post('/session/:sessionId/archive/:archiveId/stop', function(req, res, ne
   var sessionId = req.params.sessionId;
   var archiveId = req.params.archiveId;
   console.log('attempting to stop archiveId: ' + archiveId);
-    opentok.stopArchive(archiveId, function(err, archive) {
-      if (err) {
-        console.log(err);
-        res.status(500).send({error: 'stopArchive error:', err});
-        return;
-      }
-      res.send(archive);
-    });
+  opentok.stopArchive(archiveId, function(err, archive) {
+    if (err) {
+      console.log(err);
+      res.status(500).send({error: 'stopArchive error:', err});
+      return;
+    }
+    res.send(archive);
+  });
 });
 
 /*
