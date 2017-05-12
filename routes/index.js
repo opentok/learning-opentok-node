@@ -55,40 +55,27 @@ router.get('/room/:name', function(req, res, next) {
 });
 
 /**
- * POST /room/:name/archive/start
+ * POST /session/:sessionId/archive/start
  */ 
-router.post('/room/:name/archive/start', function(req, res, next) {
-  var roomName = req.params.name;
-  if (localStorage.getItem(roomName) !== null) {
-    // fetch an exiting sessionId
-    const sessionId = localStorage.getItem(roomName)
-    console.log('attempting to start archive on session: ' + sessionId);
-
-    // start archiving
-    opentok.startArchive(sessionId, { name: 'Important Presentation' }, function(err, archive) {
-      if (err) {
-        console.log(err);
-        res.status(500).send({error: 'startArchive error:', err});
-        return;
-      }
-      res.send(archive);
-    });
-  }
-  else {
-    const err = new Error("${roomName} does not exist");
-    res.status(500).send({error: 'startArchive error:', err});
-  }
+router.post('/session/:sessionId/archive/start', function(req, res, next) {
+  var sessionId = req.params.sessionId;
+  opentok.startArchive(sessionId, { name: 'Important Presentation' }, function(err, archive) {
+    if (err) {
+      console.log(err);
+      res.status(500).send({error: 'startArchive error:', err});
+      return;
+    }
+    res.send(archive);
+  });
 });
 
 /**
- * POST /room/:name/archive/:archiveId/stop
+ * POST /session/:sessionId/archive/:archiveId/stop
  */
-router.post('/room/:name/archive/:archiveId/stop', function(req, res, next) {
-  var roomName = req.params.name;
+router.post('/session/:sessionId/archive/:archiveId/stop', function(req, res, next) {
+  var sessionId = req.params.sessionId;
   var archiveId = req.params.archiveId;
-  if (localStorage.getItem(roomName) !== null) {
-    // stop archiving
-    console.log('attempting to stop archiveId: ' + archiveId);
+  console.log('attempting to stop archiveId: ' + archiveId);
     opentok.stopArchive(archiveId, function(err, archive) {
       if (err) {
         console.log(err);
@@ -97,50 +84,38 @@ router.post('/room/:name/archive/:archiveId/stop', function(req, res, next) {
       }
       res.send(archive);
     });
-  }
-  else {
-    const err = new Error("${roomName} does not exist");
-    res.status(500).send({error: 'stopArchive error:', err});
-  }
 });
 
-router.get('/room/:name/archive/:archiveId/view', function(req, res, next) {
-  var roomName = req.params.name;
+/*
+ * GET /session/:sessionId/archive/:archiveId/view
+ */
+router.get('/session/:sessionId/archive/:archiveId/view', function(req, res, next) {
+  var sessionId = req.params.sessionId;
   var archiveId = req.params.archiveId;
-  if (localStorage.getItem(roomName) !== null) {
+  
+  // fetch archive
+  opentok.getArchive(archiveId, function(err, archive) {
+    if (err) {
+      console.log(err);
+      res.status(500).send({error: 'viewArchive error:', err});
+      return;
+    }
 
-    // fetch an exiting sessionId
-    const sessionId = localStorage.getItem(roomName)
-    console.log('attempting to view archive on session: ' + sessionId);
-    
-    // fetch archive
-    opentok.getArchive(archiveId, function(err, archive) {
-      if (err) {
-        console.log(err);
-        res.status(500).send({error: 'viewArchive error:', err});
-        return;
-      }
+    // return if sessionId does not match
+    if (archive.sessionId !== sessionId) {
+      const err = new Error("${roomName} does not own this archive");
+      res.status(500).send({error: 'viewArchive error:', err});
+      return;
+    }
 
-      // return if sessionId does not match
-      if (archive.sessionId !== sessionId) {
-        const err = new Error("${roomName} does not own this archive");
-        res.status(500).send({error: 'viewArchive error:', err});
-        return;
-      }
+    // extract as a JSON object
+    const json = Object.keys(archive).reduce((json, key) => {
+      json[key] = archive[key];
+      return json;
+    }, {});
 
-      // extract as a JSON object
-      const json = Object.keys(archive).reduce((json, key) => {
-        json[key] = archive[key];
-        return json;
-      }, {});
-
-      res.send(json);
-    });
-  }
-  else {
-    const err = new Error("${roomName} does not exist");
-    res.status(500).send({error: 'viewArchive error:', err});
-  }
+    res.send(json);
+  });
 });
 
 module.exports = router;
