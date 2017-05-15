@@ -109,9 +109,9 @@ router.post('/session/:sessionId/archive/:archiveId/stop', function(req, res, ne
 });
 
 /*
- * GET /session/:sessionId/archive/:archiveId/view
+ * GET /session/:sessionId/archive/:archiveId/info
  */
-router.get('/session/:sessionId/archive/:archiveId/view', function(req, res, next) {
+router.get('/session/:sessionId/archive/:archiveId/info', function(req, res, next) {
   var sessionId = req.params.sessionId;
   var archiveId = req.params.archiveId;
   
@@ -119,7 +119,7 @@ router.get('/session/:sessionId/archive/:archiveId/view', function(req, res, nex
   opentok.getArchive(archiveId, function(err, archive) {
     if (err) {
       console.log(err);
-      res.status(500).send({error: 'viewArchive error:', err});
+      res.status(500).send({error: 'fetchArchive error:', err});
       return;
     }
 
