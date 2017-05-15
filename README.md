@@ -77,34 +77,32 @@ router.get('/room/:name', function(req, res, next) {
 });
 ```
 
+The `GET /session` routes generates a convenient session for fast establishment of communication.
+
+```javascript
+router.get('/session', function(req, res, next) { 
+  res.redirect('/room/session'); 
+}); 
+```
+
 #### Start an [Archive](https://tokbox.com/developer/guides/archiving/)
 
 You can only create an archive for sessions that have at least one client connected, the app will respond back an error otherwise. 
 
-In order to start an archive, the `startArchive` needs a session ID to kick off the process. It's not really a case here to start an archive without a session ID. So at first, the `POST /room/:name/archive/start` route checks if the passed room name exists. If so, we would retrieve the session ID and then start an archive by passing in the known session ID.
+In order to start an archive, the `startArchive` needs a session ID to kick off the process. It's not really a case here to start an archive without a session ID. So at first, the `POST /session/:sessionId/archive/start` route checks if the passed room name exists. If so, we would retrieve the session ID and then start an archive by passing in the known session ID.
 
 ```javascript
-router.post('/room/:name/archive/start', function(req, res, next) {
-  var roomName = req.params.name;
-  if (localStorage.getItem(roomName) !== null) {
-    // fetch an exiting sessionId
-    const sessionId = localStorage.getItem(roomName)
-    console.log('attempting to start archive on session: ' + sessionId);
-
-    // start archiving
-    opentok.startArchive(sessionId, { name: 'Important Presentation' }, function(err, archive) {
-      if (err) {
-        console.log(err);
-        res.status(500).send({error: 'startArchive error:', err});
-        return;
-      }
-      res.send(archive);
-    });
-  }
-  else {
-    const err = new Error("${roomName} does not exist");
-    res.status(500).send({error: 'startArchive error:', err});
-  }
+router.post('/session/:sessionId/archive/start', function(req, res, next) {
+  var sessionId = req.params.sessionId;
+  opentok.startArchive(sessionId, { name: 'Important Presentation' }, function(err, archive) {
+    if (err) {
+      console.log(err);
+      res.status(500).send({error: 'startArchive error:', err});
+      return;
+    }
+    res.setHeader('Content-Type', 'application/json');
+    res.send(archive);
+  });
 });
 ```
 
@@ -113,25 +111,76 @@ router.post('/room/:name/archive/start', function(req, res, next) {
 By having similar logic, you can stop a running archive by passing in an existing room name and archiveId(which gets returned by `startArchive` method call).
 
 ```javascript
-router.post('/room/:name/archive/:archiveId/stop', function(req, res, next) {
-  var roomName = req.params.name;
+router.post('/session/:sessionId/archive/:archiveId/stop', function(req, res, next) {
+  var sessionId = req.params.sessionId;
   var archiveId = req.params.archiveId;
-  if (localStorage.getItem(roomName) !== null) {
-    // stop archiving
-    console.log('attempting to stop archiveId: ' + archiveId);
-    opentok.stopArchive(archiveId, function(err, archive) {
-      if (err) {
-        console.log(err);
-        res.status(500).send({error: 'stopArchive error:', err});
-        return;
-      }
-      res.send(archive);
-    });
-  }
-  else {
-    const err = new Error("${roomName} does not exist");
-    res.status(500).send({error: 'stopArchive error:', err});
-  }
+  console.log('attempting to stop archive: ' + archiveId);
+  opentok.stopArchive(archiveId, function(err, archive) {
+    if (err) {
+      console.log(err);
+      res.status(500).send({error: 'stopArchive error:', err});
+      return;
+    }
+    res.setHeader('Content-Type', 'application/json');
+    res.send(archive);
+  });
+});
+```
+
+#### View an Archive
+
+The routes redirects the requested clients to a URL where the archive gets played.
+
+```javascript
+router.get('/session/:sessionId/archive/:archiveId/view', function(req, res, next) {
+  var sessionId = req.params.sessionId;
+  var archiveId = req.params.archiveId;
+  console.log('attempting to view archive: ' + archiveId);
+  opentok.getArchive(archiveId, function(err, archive) {
+    if (err) {
+      console.log(err);
+      res.status(500).send({error: 'viewArchive error:', err});
+      return;
+    }
+    console.log(archive.url);
+    res.redirect(archive.url);
+  });
+});
+``` 
+
+#### Fetch an Archive info
+
+The routes returns an json object that contains all archive properties like `status`, `url`, and `duration` etc. For more information, you can look it up [here](https://tokbox.com/developer/sdks/node/reference/Archive.html).
+
+```javascript
+router.get('/session/:sessionId/archive/:archiveId/info', function(req, res, next) {
+  var sessionId = req.params.sessionId;
+  var archiveId = req.params.archiveId;
+  
+  // fetch archive
+  console.log('attempting to info archive: ' + archiveId);
+  opentok.getArchive(archiveId, function(err, archive) {
+    if (err) {
+      console.log(err);
+      res.status(500).send({error: 'infoArchive error:', err});
+      return;
+    }
+
+    // return if sessionId does not match
+    if (archive.sessionId !== sessionId) {
+      const err = new Error("${roomName} does not own this archive");
+      res.status(500).send({error: 'infoArchive error:', err});
+      return;
+    }
+
+    // extract as a JSON object
+    const json = Object.keys(archive).reduce((json, key) => {
+      json[key] = archive[key];
+      return json;
+    }, {});
+    res.setHeader('Content-Type', 'application/json');
+    res.send(json);
+  });
 });
 ```
 
