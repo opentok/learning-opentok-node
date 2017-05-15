@@ -17,22 +17,7 @@ router.get('/', function(req, res, next) {
  * GET /session
  */
 router.get('/session', function(req, res, next) { 
-   
-  // Create a session that will attempt to transmit streams directly between 
-  // clients. If clients cannot connect, the session uses the OpenTok TURN server: 
-  opentok.createSession({mediaMode:"routed"}, function(err, session) { 
-    if (err) { 
-      console.log(err); 
-      res.status(500).send({error: 'createSession error:', err}); 
-      return; 
-    } 
-    token = opentok.generateToken(session.sessionId); 
-    res.send({ 
-      "apiKey": '', 
-      "sessionId": session.sessionId, 
-      "token": token 
-    }); 
-  }); 
+  res.redirect('/room/session'); 
 }); 
 
 /**
@@ -46,6 +31,7 @@ router.get('/room/:name', function(req, res, next) {
 
     // generate token
     token = opentok.generateToken(sessionId);
+    res.setHeader('Content-Type', 'application/json');
     res.send({
       "apiKey": apiKey,
       "sessionId": sessionId,
@@ -67,6 +53,7 @@ router.get('/room/:name', function(req, res, next) {
       
       // generate token
       token = opentok.generateToken(session.sessionId);
+      res.setHeader('Content-Type', 'application/json');
       res.send({
         "apiKey": apiKey,
         "sessionId": session.sessionId,
@@ -87,6 +74,7 @@ router.post('/session/:sessionId/archive/start', function(req, res, next) {
       res.status(500).send({error: 'startArchive error:', err});
       return;
     }
+    res.setHeader('Content-Type', 'application/json');
     res.send(archive);
   });
 });
@@ -97,18 +85,37 @@ router.post('/session/:sessionId/archive/start', function(req, res, next) {
 router.post('/session/:sessionId/archive/:archiveId/stop', function(req, res, next) {
   var sessionId = req.params.sessionId;
   var archiveId = req.params.archiveId;
-  console.log('attempting to stop archiveId: ' + archiveId);
+  console.log('attempting to stop archive: ' + archiveId);
   opentok.stopArchive(archiveId, function(err, archive) {
     if (err) {
       console.log(err);
       res.status(500).send({error: 'stopArchive error:', err});
       return;
     }
+    res.setHeader('Content-Type', 'application/json');
     res.send(archive);
   });
 });
 
-/*
+/**
+ * GET /session/:sessionId/archive/:archiveId/view
+ */
+router.get('/session/:sessionId/archive/:archiveId/view', function(req, res, next) {
+  var sessionId = req.params.sessionId;
+  var archiveId = req.params.archiveId;
+  console.log('attempting to view archive: ' + archiveId);
+  opentok.getArchive(archiveId, function(err, archive) {
+    if (err) {
+      console.log(err);
+      res.status(500).send({error: 'viewArchive error:', err});
+      return;
+    }
+    console.log(archive.url);
+    res.redirect(archive.url);
+  });
+});
+
+/**
  * GET /session/:sessionId/archive/:archiveId/info
  */
 router.get('/session/:sessionId/archive/:archiveId/info', function(req, res, next) {
@@ -116,17 +123,18 @@ router.get('/session/:sessionId/archive/:archiveId/info', function(req, res, nex
   var archiveId = req.params.archiveId;
   
   // fetch archive
+  console.log('attempting to info archive: ' + archiveId);
   opentok.getArchive(archiveId, function(err, archive) {
     if (err) {
       console.log(err);
-      res.status(500).send({error: 'fetchArchive error:', err});
+      res.status(500).send({error: 'infoArchive error:', err});
       return;
     }
 
     // return if sessionId does not match
     if (archive.sessionId !== sessionId) {
       const err = new Error("${roomName} does not own this archive");
-      res.status(500).send({error: 'viewArchive error:', err});
+      res.status(500).send({error: 'infoArchive error:', err});
       return;
     }
 
@@ -135,7 +143,7 @@ router.get('/session/:sessionId/archive/:archiveId/info', function(req, res, nex
       json[key] = archive[key];
       return json;
     }, {});
-
+    res.setHeader('Content-Type', 'application/json');
     res.send(json);
   });
 });
