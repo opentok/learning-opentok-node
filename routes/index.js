@@ -153,9 +153,18 @@ router.get('/archive/:archiveId', function(req, res, next) {
  * GET /archives
  */
 router.get('/archives', function(req, res, next) {
+
+  var options = {};
+  if (req.params.count) {
+    options['count'] = req.params.count;
+  }
+  if (req.param.offset) {
+    options['offset'] = req.params.offset;
+  }
+
   // fetch archives
   console.log('attempting to fetch archives');
-  opentok.listArchives({}, function(err, archives) {
+  opentok.listArchives(options, function(err, archives) {
     if (err) {
       console.log(err);
       res.status(500).send({error: 'infoArchive error:', err});
