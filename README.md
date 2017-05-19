@@ -191,9 +191,10 @@ A `GET` request to `/archives` with optional `count` and `offset` params returns
 
 Examples:
 ```javascript
-GET /archives?count=10  // get the first 10 archive objects
-GET /archives?offset=10  // return archives but first 10 archive objetcs
-GET /archives?count=10&offset=10 // return 10 archive objects starting from 11st
+GET /archives // fetch up to 1000 archive objects
+GET /archives?count=10  // fetch the first 10 archive objects
+GET /archives?offset=10  // fetch archives but first 10 archive objetcs
+GET /archives?count=10&offset=10 // fetch 10 archive objects starting from 11st
 ```
 
 ## More information
