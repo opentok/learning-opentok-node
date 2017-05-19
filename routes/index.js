@@ -7,6 +7,7 @@ const secret = process.env.API_SECRET || ''
 
 var OpenTok = require('opentok'),
     opentok = new OpenTok(apiKey, secret);
+var roomName;
 
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
@@ -23,7 +24,8 @@ router.get('/session', function(req, res, next) {
  * GET /room/:name
  */
 router.get('/room/:name', function(req, res, next) {
-  var roomName = req.params.name;
+  roomName = req.params.name;
+  console.log('attempting to create a session associated with' + roomName);
   if (localStorage[roomName]) {
     // fetch an exiting sessionId
     const sessionId = localStorage[roomName]
@@ -68,7 +70,7 @@ router.get('/room/:name', function(req, res, next) {
 router.post('/archive/start', function(req, res, next) {
   const json = req.body;
   const sessionId = json['sessionId'];
-  opentok.startArchive(sessionId, { name: 'Important Presentation' }, function(err, archive) {
+  opentok.startArchive(sessionId, { name: roomName }, function(err, archive) {
     if (err) {
       console.log(err);
       res.status(500).send({error: 'startArchive error:', err});
@@ -113,7 +115,7 @@ router.get('/archive/:archiveId/view', function(req, res, next) {
       res.redirect(archive.url); 
     }
     else {
-      res.render('view', { title: 'Express' });
+      res.render('view', { title: 'Archiving Pending' });
     }
   });
 });
@@ -126,7 +128,7 @@ router.get('/archive/:archiveId', function(req, res, next) {
   var archiveId = req.params.archiveId;
   
   // fetch archive
-  console.log('attempting to info archive: ' + archiveId);
+  console.log('attempting to fetch archive: ' + archiveId);
   opentok.getArchive(archiveId, function(err, archive) {
     if (err) {
       console.log(err);
