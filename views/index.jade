@@ -1,5 +1,43 @@
-extends layout
-
-block content
-  h1= title
-  p Welcome to #{title}
+doctype html
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    title Learning OpenTok Node
+  style.
+    p, td {
+    font-family: Arial;
+    }
+    td:first-child {
+    font-family: Consolas, Courier, monospace;
+    padding-right: 20px
+    }
+    tr {
+    border: 1px solid black
+    }
+  body
+    p
+      | This is a sample web service for use with OpenTok. See the OpenTok 
+      a(href='https://github.com/opentok/learning-opentok-node')
+        | learning-opentok-node
+      |  repo on GitHub.
+    p
+      | Resources are defined at the following endpoints:
+      table
+        tr
+          td GET /session/
+          td Return an OpenTok API key, session ID, and token.
+        tr
+          td GET /room/:name 
+          td Return an OpenTok API key, session ID, and token associated with a room name.
+        tr
+          td POST /archive/start
+          td Start an archive for the specified OpenTok session.
+        tr
+          td POST /archive/:archiveId/stop
+          td Stop the specified archive.
+        tr
+          td GET /archive/:archiveId/View
+          td View the specified archive.
+        tr
+          td GET /archive/:archiveId/
+          td Fetch the specified archive.

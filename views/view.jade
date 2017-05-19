@@ -1,0 +1,12 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    title View Archive
+  body
+    h1 Waiting for the archive...
+    p This page will refresh until the archive status is available.
+    script.
+      setTimeout(function() {
+      document.location.reload(true);
+      }, 3000);

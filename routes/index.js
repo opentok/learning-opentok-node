@@ -109,8 +109,13 @@ router.get('/archive/:archiveId/view', function(req, res, next) {
       res.status(500).send({error: 'viewArchive error:', err});
       return;
     }
-    console.log(archive.url);
-    res.redirect(archive.url);
+
+    if (archive.status == 'available') {
+      res.redirect(archive.url); 
+    }
+    else {
+      res.render('view', { title: 'Express' });
+    }
   });
 });
 
