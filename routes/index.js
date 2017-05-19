@@ -137,12 +137,8 @@ router.get('/archive/:archiveId', function(req, res, next) {
     }
 
     // extract as a JSON object
-    const json = Object.keys(archive).reduce((json, key) => {
-      json[key] = archive[key];
-      return json;
-    }, {});
     res.setHeader('Content-Type', 'application/json');
-    res.send(json);
+    res.send(archive);
   });
 });
 
