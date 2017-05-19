@@ -185,4 +185,8 @@ router.get('/archive/:archiveId', function(req, res, next) {
 });
 ```
 
+### Fetch multiple Archives
+
+A `GET` request to `/archives` with optional `count` and `offset` params returns a list of JSON archive objects. For more information, please check [here](https://tokbox.com/developer/sdks/node/reference/OpenTok.html#listArchives).
+
 ## More information
