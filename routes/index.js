@@ -149,4 +149,23 @@ router.get('/archive/:archiveId', function(req, res, next) {
   });
 });
 
+/**
+ * GET /archives
+ */
+router.get('/archives', function(req, res, next) {
+  // fetch archives
+  console.log('attempting to fetch archives');
+  opentok.listArchives({}, function(err, archives) {
+    if (err) {
+      console.log(err);
+      res.status(500).send({error: 'infoArchive error:', err});
+      return;
+    }
+
+    // extract as a JSON object
+    res.setHeader('Content-Type', 'application/json');
+    res.send(archives);
+  });
+});
+
 module.exports = router;
