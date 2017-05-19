@@ -158,7 +158,7 @@ router.get('/archive/:archiveId/view', function(req, res, next) {
 
 ### Fetch an Archive info
 
-A `GET` request to '/archive/:archiveId' returns a JSON object that contains all archive properties, including `status`, `url`, `duration`, etc. For more information, see [here](https://tokbox.com/developer/sdks/node/reference/Archive.html).
+A `GET` request to `/archive/:archiveId` returns a JSON object that contains all archive properties, including `status`, `url`, `duration`, etc. For more information, see [here](https://tokbox.com/developer/sdks/node/reference/Archive.html).
 
 ```javascript
 router.get('/archive/:archiveId', function(req, res, next) {
