@@ -189,4 +189,11 @@ router.get('/archive/:archiveId', function(req, res, next) {
 
 A `GET` request to `/archives` with optional `count` and `offset` params returns a list of JSON archive objects. For more information, please check [here](https://tokbox.com/developer/sdks/node/reference/OpenTok.html#listArchives).
 
+#### Examples:
+```javascript
+GET /archives?count=10  // get the first 10 archive objects
+GET /archives?offset=10  // return archives but first 10 archive objetcs
+GET /archives?count=10&offset=10 // return 10 archive objects starting from 11st
+```
+
 ## More information
