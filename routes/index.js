@@ -64,10 +64,11 @@ router.get('/room/:name', function(req, res, next) {
 });
 
 /**
- * POST /session/:sessionId/archive/start
+ * POST /archive/start
  */ 
-router.post('/session/:sessionId/archive/start', function(req, res, next) {
-  var sessionId = req.params.sessionId;
+router.post('/archive/start', function(req, res, next) {
+  const json = req.body;
+  const sessionId = json['sessionId'];
   opentok.startArchive(sessionId, { name: 'Important Presentation' }, function(err, archive) {
     if (err) {
       console.log(err);
@@ -80,10 +81,9 @@ router.post('/session/:sessionId/archive/start', function(req, res, next) {
 });
 
 /**
- * POST /session/:sessionId/archive/:archiveId/stop
+ * POST /archive/:archiveId/stop
  */
-router.post('/session/:sessionId/archive/:archiveId/stop', function(req, res, next) {
-  var sessionId = req.params.sessionId;
+router.post('/archive/:archiveId/stop', function(req, res, next) {
   var archiveId = req.params.archiveId;
   console.log('attempting to stop archive: ' + archiveId);
   opentok.stopArchive(archiveId, function(err, archive) {
@@ -98,10 +98,9 @@ router.post('/session/:sessionId/archive/:archiveId/stop', function(req, res, ne
 });
 
 /**
- * GET /session/:sessionId/archive/:archiveId/view
+ * GET /archive/:archiveId/view
  */
-router.get('/session/:sessionId/archive/:archiveId/view', function(req, res, next) {
-  var sessionId = req.params.sessionId;
+router.get('/archive/:archiveId/view', function(req, res, next) {
   var archiveId = req.params.archiveId;
   console.log('attempting to view archive: ' + archiveId);
   opentok.getArchive(archiveId, function(err, archive) {
@@ -116,9 +115,9 @@ router.get('/session/:sessionId/archive/:archiveId/view', function(req, res, nex
 });
 
 /**
- * GET /session/:sessionId/archive/:archiveId/info
+ * GET /archive/:archiveId
  */
-router.get('/session/:sessionId/archive/:archiveId/info', function(req, res, next) {
+router.get('/archive/:archiveId', function(req, res, next) {
   var sessionId = req.params.sessionId;
   var archiveId = req.params.archiveId;
   
@@ -127,13 +126,6 @@ router.get('/session/:sessionId/archive/:archiveId/info', function(req, res, nex
   opentok.getArchive(archiveId, function(err, archive) {
     if (err) {
       console.log(err);
-      res.status(500).send({error: 'infoArchive error:', err});
-      return;
-    }
-
-    // return if sessionId does not match
-    if (archive.sessionId !== sessionId) {
-      const err = new Error("${roomName} does not own this archive");
       res.status(500).send({error: 'infoArchive error:', err});
       return;
     }
