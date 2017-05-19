@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var LocalStorage = require('node-localstorage').LocalStorage;
-localStorage = new LocalStorage('./rooms');
+var localStorage = {};
 
 const apiKey = process.env.API_KEY || ''
 const secret = process.env.API_SECRET || ''
@@ -25,9 +24,9 @@ router.get('/session', function(req, res, next) {
  */
 router.get('/room/:name', function(req, res, next) {
   var roomName = req.params.name;
-  if (localStorage.getItem(roomName) !== null) {
+  if (localStorage[roomName]) {
     // fetch an exiting sessionId
-    const sessionId = localStorage.getItem(roomName)
+    const sessionId = localStorage[roomName]
 
     // generate token
     token = opentok.generateToken(sessionId);
@@ -49,7 +48,7 @@ router.get('/room/:name', function(req, res, next) {
       }
 
       // store into local
-      localStorage.setItem(roomName, session.sessionId);
+      localStorage[roomName] = session.sessionId;
       
       // generate token
       token = opentok.generateToken(session.sessionId);
