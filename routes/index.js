@@ -5,6 +5,13 @@ var localStorage = {};
 const apiKey = process.env.API_KEY || ''
 const secret = process.env.API_SECRET || ''
 
+if (!apiKey || !secret) {
+  console.log("================================");
+  console.log("Missing apiKey or secret in " + __filename);
+  console.log("================================");
+  process.exit()
+}
+
 var OpenTok = require('opentok'),
     opentok = new OpenTok(apiKey, secret);
 var roomName;
