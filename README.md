@@ -2,7 +2,7 @@
 
 # Simple OpenTok Server App by Node.js
 
-This simple server app shows you how to use [OpenTok Node Server SDK](https://tokbox.com/developer/sdks/node/) to create sessions, generate tokens for those sessions, archive (or record) sessions and download those archives.
+This simple server app shows you how to use [OpenTok Node Server SDK](https://tokbox.com/developer/sdks/node/) to create OpenTok sessions, generate tokens for those sessions, archive (or record) sessions, and download those archives.
 
 ## Quick deploy to Heroku
 
@@ -29,14 +29,14 @@ obtain at the [TokBox Dashboard](https://dashboard.tokbox.com/keys).
 
 ## Exploring the code 
 
-This simple server app starts off using [Express application generator](https://expressjs.com/en/starter/generator.html) which generates a ready-in-use Node.js server app template so that you can focus on implementation rather than configuration, port setup, and error handling etc. There are a couple things getting created but `routes/index.js` is the only piece we need to pay attention to throughout this tutorial.
+The `routes/index.js` file is the Express routing for the web service. The rest of this tutorial
+discusses code in this file.
 
-In order to navigate clients to a designated meeting spot, we associate the [Session ID](https://tokbox.com/developer/guides/basics/#sessions) to a room name which is easier for people to recognize and pass. For simplicity, we use [node-localstorage](https://www.npmjs.com/package/node-localstorage) to implement the association. Basically, [node-localstorage](https://www.npmjs.com/package/node-localstorage) provides a local persistence hash that the key is the room name and the value is the [Session ID](https://tokbox.com/developer/guides/basics/#sessions). For production applications, you might want to configure a database to achieve this functionality.
-<br>
+In order to navigate clients to a designated meeting spot, we associate the [Session ID](https://tokbox.com/developer/guides/basics/#sessions) to a room name which is easier for people to recognize and pass. For simplicity, we use [node-localstorage](https://www.npmjs.com/package/node-localstorage) to implement the association. Basically, [node-localstorage](https://www.npmjs.com/package/node-localstorage) provides a local persistence hash of key-value pairs, where the room name is the key and the [Session ID](https://tokbox.com/developer/guides/basics/#sessions) is the value. For production applications, you may want to configure a database to achieve this functionality.
 
-#### Generate/Retrieve a Session ID
+### Generate/Retrieve a Session ID
 
-The `GET /room/:name` route handles the passed room name and performs a check to determine whether the app should generate a new session ID or retrieve from the local in-memory hahs. Then, we generate the token by that known session ID. Once API key, session ID, and token are ready, you can respond back all of them in a JSON object.
+The `GET /room/:name` route associates an OpenTok session with a "room" name. This route handles the passed room name and performs a check to determine whether the app should generate a new session ID or retrieve a session ID from the local in-memory hash. Then, it generates an OpenTok token for that session ID. Once the API key, session ID, and token are ready, it sends a response with the body set to a JSON object containing the information.
 
 ```javascript
 if (localStorage[roomName]) {
@@ -85,17 +85,16 @@ router.get('/session', function(req, res, next) {
 }); 
 ```
 
-#### Start an [Archive](https://tokbox.com/developer/guides/archiving/)
+### Start an [Archive](https://tokbox.com/developer/guides/archiving/)
 
-You can only create an archive for sessions that have at least one client connected, the app will respond back an error otherwise. 
-
-In order to start an archive, the `startArchive` needs a session ID to kick off the process. It's not really a case here to start an archive without a session ID. So at first, the `POST /archive/start` route checks if the passed room name exists. If so, we would retrieve the session ID and then start an archive by passing in the known session ID.
+A `POST` request to the `/archive/start` route starts an archive recording of an OpenTok session.
+The session ID OpenTok session is passed in as JSON data in the body of the request
 
 ```javascript
 router.post('/archive/start', function(req, res, next) {
   const json = req.body;
   const sessionId = json['sessionId'];
-  opentok.startArchive(sessionId, { name: 'Important Presentation' }, function(err, archive) {
+  opentok.startArchive(sessionId, { name: roomName }, function(err, archive) {
     if (err) {
       console.log(err);
       res.status(500).send({error: 'startArchive error:', err});
@@ -107,9 +106,13 @@ router.post('/archive/start', function(req, res, next) {
 });
 ```
 
-#### Stop an Archive
+You can only create an archive for sessions that have at least one client connected. Otherwise,
+the app will respond with an error.
 
-By having similar logic, you can stop a running archive by passing in an existing room name and archiveId(which gets returned by `startArchive` method call).
+### Stop an Archive
+
+A `POST` request to the `/archive:archiveId/stop` route stops an archive recording.
+The archive ID is returned by call to the `archive/start` endpoint.
 
 ```javascript
 router.post('/archive/:archiveId/stop', function(req, res, next) {
@@ -127,9 +130,10 @@ router.post('/archive/:archiveId/stop', function(req, res, next) {
 });
 ```
 
-#### View an Archive
+### View an Archive
 
-The routes redirects the requested clients to a URL where the archive gets played.
+A `GET` request to `'/archive/:archiveId/view'` redirects the requested clients to
+a URL where the archive gets played.
 
 ```javascript
 router.get('/archive/:archiveId/view', function(req, res, next) {
@@ -146,15 +150,15 @@ router.get('/archive/:archiveId/view', function(req, res, next) {
       res.redirect(archive.url); 
     }
     else {
-      res.render('view', { title: 'Express' });
+      res.render('view', { title: 'Archiving Pending' });
     }
   });
 });
 ``` 
 
-#### Fetch an Archive info
+### Fetch an Archive info
 
-The routes returns an json object that contains all archive properties like `status`, `url`, and `duration` etc. For more information, you can look it up [here](https://tokbox.com/developer/sdks/node/reference/Archive.html).
+A `GET` request to '/archive/:archiveId' returns a JSON object that contains all archive properties, including `status`, `url`, `duration`, etc. For more information, see [here](https://tokbox.com/developer/sdks/node/reference/Archive.html).
 
 ```javascript
 router.get('/archive/:archiveId', function(req, res, next) {
