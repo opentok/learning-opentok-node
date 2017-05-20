@@ -24,15 +24,22 @@ obtain at the [TokBox Dashboard](https://dashboard.tokbox.com/keys).
 
   1. Once you have cloned the app, `cd` to the root directory.
   2. Run `npm install` command to fetch and install all npm dependecies.
-  3. Run `npm start` command to start the app.
-  4. Visit the URL http://localhost:8080/session in your browser. You should see a JSON response containing the OpenTok API key, session ID, and token.
+  3. Next, input your own API Key and API Secret into the `route/index.js` file:
+
+      ```
+      const apiKey = process.env.API_KEY || ''
+      const secret = process.env.API_SECRET || ''
+      ```
+    
+  4. Run `npm start` command to start the app.
+  5. Visit the URL http://localhost:8080/session in your browser. You should see a JSON response containing the OpenTok API key, session ID, and token.
 
 ## Exploring the code 
 
 The `routes/index.js` file is the Express routing for the web service. The rest of this tutorial
 discusses code in this file.
 
-In order to navigate clients to a designated meeting spot, we associate the [Session ID](https://tokbox.com/developer/guides/basics/#sessions) to a room name which is easier for people to recognize and pass. For simplicity, we use [node-localstorage](https://www.npmjs.com/package/node-localstorage) to implement the association. Basically, [node-localstorage](https://www.npmjs.com/package/node-localstorage) provides a local persistence hash of key-value pairs, where the room name is the key and the [Session ID](https://tokbox.com/developer/guides/basics/#sessions) is the value. For production applications, you may want to configure a database to achieve this functionality.
+In order to navigate clients to a designated meeting spot, we associate the [Session ID](https://tokbox.com/developer/guides/basics/#sessions) to a room name which is easier for people to recognize and pass. For simplicity, we use a local associated array to implement the association where the room name is the key and the [Session ID](https://tokbox.com/developer/guides/basics/#sessions) is the value. For production applications, you may want to configure a persistence to achieve this functionality.
 
 ### Generate/Retrieve a Session ID
 
