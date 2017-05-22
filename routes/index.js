@@ -17,7 +17,7 @@ var OpenTok = require('opentok'),
 var roomName;
 
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+  res.render('index', { title: 'Learning-OpenTok-Node' });
 });
 
 /**
