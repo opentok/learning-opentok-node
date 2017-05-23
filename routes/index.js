@@ -150,9 +150,9 @@ router.get('/archive/:archiveId', function(req, res, next) {
 });
 
 /**
- * GET /archives
+ * GET /archive
  */
-router.get('/archives', function(req, res, next) {
+router.get('/archive', function(req, res, next) {
 
   var options = {};
   if (req.params.count) {

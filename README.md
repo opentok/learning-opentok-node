@@ -190,14 +190,14 @@ router.get('/archive/:archiveId', function(req, res, next) {
 
 ### Fetch multiple Archives
 
-A `GET` request to `/archives` with optional `count` and `offset` params returns a list of JSON archive objects. For more information, please check [here](https://tokbox.com/developer/sdks/node/reference/OpenTok.html#listArchives).
+A `GET` request to `/archive` with optional `count` and `offset` params returns a list of JSON archive objects. For more information, please check [here](https://tokbox.com/developer/sdks/node/reference/OpenTok.html#listArchives).
 
 Examples:
 ```javascript
-GET /archives // fetch up to 1000 archive objects
-GET /archives?count=10  // fetch the first 10 archive objects
-GET /archives?offset=10  // fetch archives but first 10 archive objetcs
-GET /archives?count=10&offset=10 // fetch 10 archive objects starting from 11st
+GET /archive // fetch up to 1000 archive objects
+GET /archive?count=10  // fetch the first 10 archive objects
+GET /archive?offset=10  // fetch archives but first 10 archive objetcs
+GET /archive?count=10&offset=10 // fetch 10 archive objects starting from 11st
 ```
 
 ## More information
