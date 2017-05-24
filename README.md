@@ -18,21 +18,26 @@ obtain at the [TokBox Dashboard](https://dashboard.tokbox.com/keys).
 ## Requirements
 
 - [Node.js](https://nodejs.org/)
-- [Express](https://expressjs.com/)
 
 ## Installing & Running on localhost
 
-  1. Once you have cloned the app, `cd` to the root directory.
-  2. Run `npm install` command to fetch and install all npm dependecies.
-  3. Next, add your own API Key and API Secret to the environment variables by running commands:
+  1. Clone the app by running the command
+  
+		git clone git@github.com:opentok/learning-opentok-node.git
+
+  2. `cd` to the root directory.
+  3. Run `npm install` command to fetch and install all npm dependecies.
+  4. Next, rename the `.envcopy` file located at the root directory to `.env`, and enter in your TokBox api key and secret as indicated:
 
       ```
-      export API_KEY=0000000
-      export API_SECRET=abcdef1234567890abcdef01234567890abcdef
+      # enter your TokBox api key after the '=' sign below
+      TOKBOX_API_KEY=
+      # enter your TokBox secret after the '=' sign below
+      TOKBOX_SECRET=
       ```
     
-  4. Run `npm start` command to start the app.
-  5. Visit the URL http://localhost:8080/session in your browser. You should see a JSON response containing the OpenTok API key, session ID, and token.
+  4. Run `npm start` to start the app.
+  5. Visit the URL <http://localhost:8080/session> in your browser. You should see a JSON response containing the OpenTok API key, session ID, and token.
 
 ## Exploring the code 
 
@@ -163,7 +168,7 @@ router.get('/archive/:archiveId/view', function(req, res, next) {
 });
 ``` 
 
-### Fetch an Archive info
+### Get Archive information
 
 A `GET` request to `/archive/:archiveId` returns a JSON object that contains all archive properties, including `status`, `url`, `duration`, etc. For more information, see [here](https://tokbox.com/developer/sdks/node/reference/Archive.html).
 

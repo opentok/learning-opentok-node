@@ -1,15 +1,19 @@
 var express = require('express');
+const path = require('path');
 var router = express.Router();
+
 var localStorage = {};
 
-const apiKey = process.env.API_KEY || ''
-const secret = process.env.API_SECRET || ''
+const apiKey = process.env.TOKBOX_API_KEY;
+const secret = process.env.TOKBOX_SECRET;
 
 if (!apiKey || !secret) {
-  console.log("================================");
-  console.log("Missing apiKey or secret in " + __filename);
-  console.log("================================");
-  process.exit()
+  console.error('===============================================================================');
+  console.error('Missing TOKBOX_API_KEY or TOKBOX_SECRET');
+  console.error('Find the appropriate values for these by logging into your TokBox Dashboard');
+  console.error('Then add them to ', path.resolve('../.env'), 'or as environment variables' );
+  console.error('===============================================================================');
+  process.exit();
 }
 
 var OpenTok = require('opentok'),
