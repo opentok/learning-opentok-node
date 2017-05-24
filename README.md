@@ -47,7 +47,7 @@ The `GET /room/:name` route associates an OpenTok session with a "room" name. Th
 
 ```javascript
 if (localStorage[roomName]) {
-  // fetch an exiting sessionId
+  // fetch an existing sessionId
   const sessionId = localStorage[roomName]
 
   // generate token
