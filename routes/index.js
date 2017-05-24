@@ -1,8 +1,6 @@
-var express = require('express');
+const express = require('express');
 const path = require('path');
-var router = express.Router();
-
-var localStorage = {};
+const router = express.Router();
 
 const apiKey = process.env.TOKBOX_API_KEY;
 const secret = process.env.TOKBOX_SECRET;
@@ -16,8 +14,14 @@ if (!apiKey || !secret) {
   process.exit();
 }
 
-var OpenTok = require('opentok'),
-    opentok = new OpenTok(apiKey, secret);
+const OpenTok = require('opentok');
+const opentok = new OpenTok(apiKey, secret);
+
+// IMPORTANT: roomToSessionIdDictionary is a variable that associates room names with unique sesssion IDs 
+// However, since this is stored in memory, restarting your server will reset these values
+// if you want to have a room-to-session association in your production application
+// you should consider a more persistent storage
+var roomToSessionIdDictionary = {};
 var roomName;
 
 router.get('/', function(req, res, next) {
@@ -25,7 +29,7 @@ router.get('/', function(req, res, next) {
 });
 
 /**
- * GET /session
+ * GET /session redirects to /room/session
  */
 router.get('/session', function(req, res, next) { 
   res.redirect('/room/session'); 
@@ -35,14 +39,15 @@ router.get('/session', function(req, res, next) {
  * GET /room/:name
  */
 router.get('/room/:name', function(req, res, next) {
-  roomName = req.params.name;
-  console.log('attempting to create a session associated with' + roomName);
-  if (localStorage[roomName]) {
-    // fetch an exiting sessionId
-    const sessionId = localStorage[roomName]
+  const roomName = req.params.name;
+  console.log('attempting to create a session associated with the room: ' + roomName);
+
+  // if the room name is associated with a session ID, fetch that
+  if (roomToSessionIdDictionary[roomName]) {
+    const sessionId = roomToSessionIdDictionary[roomName]
 
     // generate token
-    token = opentok.generateToken(sessionId);
+    const token = opentok.generateToken(sessionId);
     res.setHeader('Content-Type', 'application/json');
     res.send({
       "apiKey": apiKey,
@@ -50,9 +55,8 @@ router.get('/room/:name', function(req, res, next) {
       "token": token
     });
   }
+  // if this is the first time the room is being accessed, create a new session ID
   else {
-    // Create a session that will attempt to transmit streams directly between
-    // clients. If clients cannot connect, the session uses the OpenTok TURN server:
     opentok.createSession({mediaMode:"routed"}, function(err, session) {
       if (err) {
         console.log(err);
@@ -60,8 +64,11 @@ router.get('/room/:name', function(req, res, next) {
         return;
       }
 
-      // store into local
-      localStorage[roomName] = session.sessionId;
+      // now that the room name has a session associated wit it, store it in memory
+      // IMPORTANT: Because this is stored in memory, restarting your server will reset these values
+      // if you want to store a room-to-session association in your production application
+      // you should use a more persistent storage for them
+      roomToSessionIdDictionary[roomName] = session.sessionId;
       
       // generate token
       token = opentok.generateToken(session.sessionId);
@@ -83,7 +90,8 @@ router.post('/archive/start', function(req, res, next) {
   const sessionId = json['sessionId'];
   opentok.startArchive(sessionId, { name: roomName }, function(err, archive) {
     if (err) {
-      console.log(err);
+      console.error('error in startArchive');
+      console.error(err);
       res.status(500).send({error: 'startArchive error:', err});
       return;
     }
@@ -100,7 +108,8 @@ router.post('/archive/:archiveId/stop', function(req, res, next) {
   console.log('attempting to stop archive: ' + archiveId);
   opentok.stopArchive(archiveId, function(err, archive) {
     if (err) {
-      console.log(err);
+      console.error('error in stopArchive');
+      console.error(err);
       res.status(500).send({error: 'stopArchive error:', err});
       return;
     }
@@ -117,8 +126,9 @@ router.get('/archive/:archiveId/view', function(req, res, next) {
   console.log('attempting to view archive: ' + archiveId);
   opentok.getArchive(archiveId, function(err, archive) {
     if (err) {
-      console.log(err);
-      res.status(500).send({error: 'viewArchive error:', err});
+      console.error('error in getArchive');
+      console.error(err);
+      res.status(500).send({error: 'getArchive error:', err});
       return;
     }
 
@@ -135,15 +145,16 @@ router.get('/archive/:archiveId/view', function(req, res, next) {
  * GET /archive/:archiveId
  */
 router.get('/archive/:archiveId', function(req, res, next) {
-  var sessionId = req.params.sessionId;
-  var archiveId = req.params.archiveId;
+  const sessionId = req.params.sessionId;
+  const archiveId = req.params.archiveId;
   
   // fetch archive
   console.log('attempting to fetch archive: ' + archiveId);
   opentok.getArchive(archiveId, function(err, archive) {
     if (err) {
-      console.log(err);
-      res.status(500).send({error: 'infoArchive error:', err});
+      console.error('error in getArchive');
+      console.error(err);
+      res.status(500).send({error: 'getArchive error:', err});
       return;
     }
 
@@ -166,11 +177,12 @@ router.get('/archive', function(req, res, next) {
     options['offset'] = req.params.offset;
   }
 
-  // fetch archives
-  console.log('attempting to fetch archives');
+  // list archives
+  console.log('attempting to list archives');
   opentok.listArchives(options, function(err, archives) {
     if (err) {
-      console.log(err);
+      console.error('error in listArchives');
+      console.error(err);
       res.status(500).send({error: 'infoArchive error:', err});
       return;
     }
