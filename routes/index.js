@@ -1,6 +1,6 @@
 const express = require('express');
-const path = require('path');
 const router = express.Router();
+const path = require('path');
 
 const apiKey = process.env.TOKBOX_API_KEY;
 const secret = process.env.TOKBOX_SECRET;
@@ -9,7 +9,7 @@ if (!apiKey || !secret) {
   console.error('===============================================================================');
   console.error('Missing TOKBOX_API_KEY or TOKBOX_SECRET');
   console.error('Find the appropriate values for these by logging into your TokBox Dashboard');
-  console.error('Then add them to ', path.resolve('../.env'), 'or as environment variables' );
+  console.error('Then add them to ', path.resolve('.env'), 'or as environment variables' );
   console.error('===============================================================================');
   process.exit();
 }
@@ -71,7 +71,7 @@ router.get('/room/:name', function(req, res, next) {
       roomToSessionIdDictionary[roomName] = session.sessionId;
       
       // generate token
-      token = opentok.generateToken(session.sessionId);
+      const token = opentok.generateToken(session.sessionId);
       res.setHeader('Content-Type', 'application/json');
       res.send({
         "apiKey": apiKey,
