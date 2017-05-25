@@ -6,6 +6,17 @@ var _ = require('lodash');
 var apiKey = process.env.TOKBOX_API_KEY;
 var secret = process.env.TOKBOX_SECRET;
 
+if (!apiKey || !secret) {
+  console.error('=========================================================================================================');
+  console.error('');
+  console.error('Missing TOKBOX_API_KEY or TOKBOX_SECRET');
+  console.error('Find the appropriate values for these by logging into your TokBox Dashboard at: https://tokbox.com/account/#/');
+  console.error('Then add them to ', path.resolve('.env'), 'or as environment variables' );
+  console.error('');
+  console.error('=========================================================================================================');
+  process.exit();
+}
+
 var OpenTok = require('opentok');
 var opentok = new OpenTok(apiKey, secret);
 
@@ -19,15 +30,6 @@ var roomToSessionIdDictionary = {};
 // returns the room name, given a session ID that was associated with it
 function findRoomFromSessionId(sessionId) {
   return _.findKey(roomToSessionIdDictionary, function (value) { return value === sessionId; });
-}
-
-if (!apiKey || !secret) {
-  console.error('===============================================================================');
-  console.error('Missing TOKBOX_API_KEY or TOKBOX_SECRET');
-  console.error('Find the appropriate values for these by logging into your TokBox Dashboard');
-  console.error('Then add them to ', path.resolve('../.env'), 'or as environment variables');
-  console.error('===============================================================================');
-  process.exit();
 }
 
 router.get('/', function (req, res) {
