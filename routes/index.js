@@ -177,11 +177,11 @@ router.get('/archive/:archiveId', function (req, res) {
  */
 router.get('/archive', function (req, res) {
   var options = {};
-  if (req.params.count) {
-    options.count = req.params.count;
+  if (req.query.count) {
+    options.count = req.query.count;
   }
-  if (req.param.offset) {
-    options.offset = req.params.offset;
+  if (req.query.offset) {
+    options.offset = req.query.offset;
   }
 
   // list archives
