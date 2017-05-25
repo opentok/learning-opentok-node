@@ -23,7 +23,7 @@ obtain at the [TokBox Dashboard](https://dashboard.tokbox.com/keys).
 
   1. Clone the app by running the command
   
-		git clone git@github.com:opentok/learning-opentok-node.git
+		  git clone git@github.com:opentok/learning-opentok-node.git
 
   2. `cd` to the root directory.
   3. Run `npm install` command to fetch and install all npm dependecies.
