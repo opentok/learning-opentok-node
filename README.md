@@ -67,7 +67,7 @@ if (localStorage[roomName]) {
 else {
   // Create a session that will attempt to transmit streams directly between
   // clients. If clients cannot connect, the session uses the OpenTok TURN server:
-  opentok.createSession({mediaMode:"routed"}, function(err, session) {
+  opentok.createSession({mediaMode:"relayed"}, function(err, session) {
     if (err) {
       console.log(err);
       res.status(500).send({error: 'createSession error:', err});
