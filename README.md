@@ -1,6 +1,6 @@
-![logo](./tokbox-logo.png)
-
 # Simple OpenTok Server App by Node.js
+
+<img src="https://assets.tokbox.com/img/vonage/Vonage_VideoAPI_black.svg" height="48px" alt="Tokbox is now known as Vonage" />
 
 This simple server app shows you how to use [OpenTok Node Server SDK](https://tokbox.com/developer/sdks/node/) to create OpenTok sessions, generate tokens for those sessions, archive (or record) sessions, and download those archives.
 
@@ -215,3 +215,20 @@ It is intended to be used with the OpenTok tutorials for Web, iOS, iOS-Swift, or
 * [iOS](https://tokbox.com/developer/tutorials/ios/basic-video-chat/)
 * [iOS-Swift](https://tokbox.com/developer/tutorials/ios/swift/basic-video-chat/)
 * [Android](https://tokbox.com/developer/tutorials/android/basic-video-chat/)
+
+## Development and Contributing
+
+Interested in contributing? We :heart: pull requests! See the [Contribution](CONTRIBUTING.md) guidelines.
+
+## Getting Help
+
+We love to hear from you so if you have questions, comments or find a bug in the project, let us know! You can either:
+
+- Open an issue on this repository
+- See <https://support.tokbox.com/> for support options
+- Tweet at us! We're [@VonageDev](https://twitter.com/VonageDev) on Twitter
+- Or [join the Vonage Developer Community Slack](https://developer.nexmo.com/community/slack)
+
+## Further Reading
+
+- Check out the Developer Documentation at <https://tokbox.com/developer/>
