@@ -21,7 +21,7 @@ var OpenTok = require('opentok');
 var opentok = new OpenTok(apiKey, secret);
 
 // IMPORTANT: roomToSessionIdDictionary is a variable that associates room names with unique
-// unique sesssion IDs. However, since this is stored in memory, restarting your server will
+// unique session IDs. However, since this is stored in memory, restarting your server will
 // reset these values if you want to have a room-to-session association in your production
 // application you should consider a more persistent storage
 
