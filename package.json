@@ -7,18 +7,19 @@
   },
   "dependencies": {
     "body-parser": "^1.19.0",
-    "cookie-parser": "~1.4.3",
-    "cors": "^2.8.3",
-    "debug": "~2.6.3",
-    "dotenv": "^4.0.0",
-    "eslint": "^3.19.0",
-    "eslint-config-airbnb-base": "^10.0.1",
-    "eslint-plugin-import": "^2.22.0",
+    "cookie-parser": "~1.4.5",
+    "cors": "^2.8.5",
+    "debug": "~4.3.1",
+    "dotenv": "^8.2.0",
+    "eslint": "^7.25.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
     "express": "^4.17.1",
-    "jade": "~1.11.0",
-    "lodash": "^4.17.4",
+    "jade": "^1.11.0",
+    "lodash": "^4.17.21",
     "morgan": "^1.10.0",
-    "opentok": "^2.10.0",
-    "serve-favicon": "~2.4.2"
+    "opentok": "^2.11.0",
+    "serve-favicon": "~2.5.0",
+    "uglify-js": "^3.13.4"
   }
 }
