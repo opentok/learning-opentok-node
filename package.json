@@ -18,7 +18,7 @@
     "jade": "^1.11.0",
     "lodash": "^4.17.21",
     "morgan": "^1.10.0",
-    "opentok": "^2.11.0",
+    "opentok": "^2.15.2",
     "serve-favicon": "~2.5.0",
     "uglify-js": "^3.13.4"
   }
