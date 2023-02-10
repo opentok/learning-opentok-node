@@ -15,7 +15,7 @@
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
     "express": "^4.17.1",
-    "jade": "^1.11.0",
+    "jade": "^0.29.0",
     "lodash": "^4.17.21",
     "morgan": "^1.10.0",
     "opentok": "^2.11.0",
