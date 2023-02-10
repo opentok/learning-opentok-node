@@ -21,25 +21,25 @@ obtain at the [TokBox Dashboard](https://dashboard.tokbox.com/keys).
 
 ## Installing & Running on localhost
 
-  1. Clone the app by running the command
-  
-		  git clone git@github.com:opentok/learning-opentok-node.git
+1. Clone the app by running the command
 
-  2. `cd` to the root directory.
-  3. Run `npm install` command to fetch and install all npm dependecies.
-  4. Next, rename the `.envcopy` file located at the root directory to `.env`, and enter in your TokBox api key and secret as indicated:
+   git clone git@github.com:opentok/learning-opentok-node.git
 
-      ```
-      # enter your TokBox api key after the '=' sign below
-      TOKBOX_API_KEY=
-      # enter your TokBox secret after the '=' sign below
-      TOKBOX_SECRET=
-      ```
-    
-  4. Run `npm start` to start the app.
-  5. Visit the URL <http://localhost:8080/session> in your browser. You should see a JSON response containing the OpenTok API key, session ID, and token.
+2. `cd` to the root directory.
+3. Run `npm install` command to fetch and install all npm dependecies.
+4. Next, rename the `.envcopy` file located at the root directory to `.env`, and enter in your TokBox api key and secret as indicated:
 
-## Exploring the code 
+   ```
+   # enter your TokBox api key after the '=' sign below
+   TOKBOX_API_KEY=
+   # enter your TokBox secret after the '=' sign below
+   TOKBOX_SECRET=
+   ```
+
+5. Run `npm start` to start the app.
+6. Visit the URL <http://localhost:8080/session> in your browser. You should see a JSON response containing the OpenTok API key, session ID, and token.
+
+## Exploring the code
 
 The `routes/index.js` file is the Express routing for the web service. The rest of this tutorial
 discusses code in this file.
@@ -53,37 +53,36 @@ The `GET /room/:name` route associates an OpenTok session with a "room" name. Th
 ```javascript
 if (localStorage[roomName]) {
   // fetch an existing sessionId
-  const sessionId = localStorage[roomName]
+  const sessionId = localStorage[roomName];
 
   // generate token
   token = opentok.generateToken(sessionId);
   res.setHeader('Content-Type', 'application/json');
   res.send({
-    "apiKey": apiKey,
-    "sessionId": sessionId,
-    "token": token
+    apiKey: apiKey,
+    sessionId: sessionId,
+    token: token,
   });
-}
-else {
+} else {
   // Create a session that will attempt to transmit streams directly between
   // clients. If clients cannot connect, the session uses the OpenTok TURN server:
-  opentok.createSession({mediaMode:"relayed"}, function(err, session) {
+  opentok.createSession({ mediaMode: 'relayed' }, function (err, session) {
     if (err) {
       console.log(err);
-      res.status(500).send({error: 'createSession error:', err});
+      res.status(500).send({ error: 'createSession error:', err });
       return;
     }
 
     // store into local
     localStorage[roomName] = session.sessionId;
-    
+
     // generate token
     token = opentok.generateToken(session.sessionId);
     res.setHeader('Content-Type', 'application/json');
     res.send({
-      "apiKey": apiKey,
-      "sessionId": session.sessionId,
-      "token": token
+      apiKey: apiKey,
+      sessionId: session.sessionId,
+      token: token,
     });
   });
 }
@@ -92,9 +91,9 @@ else {
 The `GET /session` routes generates a convenient session for fast establishment of communication.
 
 ```javascript
-router.get('/session', function(req, res, next) { 
-  res.redirect('/room/session'); 
-}); 
+router.get('/session', function (req, res, next) {
+  res.redirect('/room/session');
+});
 ```
 
 ### Start an [Archive](https://tokbox.com/developer/guides/archiving/)
@@ -103,13 +102,13 @@ A `POST` request to the `/archive/start` route starts an archive recording of an
 The session ID OpenTok session is passed in as JSON data in the body of the request
 
 ```javascript
-router.post('/archive/start', function(req, res, next) {
+router.post('/archive/start', function (req, res, next) {
   const json = req.body;
   const sessionId = json['sessionId'];
-  opentok.startArchive(sessionId, { name: roomName }, function(err, archive) {
+  opentok.startArchive(sessionId, { name: roomName }, function (err, archive) {
     if (err) {
       console.log(err);
-      res.status(500).send({error: 'startArchive error:', err});
+      res.status(500).send({ error: 'startArchive error:', err });
       return;
     }
     res.setHeader('Content-Type', 'application/json');
@@ -127,13 +126,13 @@ A `POST` request to the `/archive:archiveId/stop` route stops an archive recordi
 The archive ID is returned by call to the `archive/start` endpoint.
 
 ```javascript
-router.post('/archive/:archiveId/stop', function(req, res, next) {
+router.post('/archive/:archiveId/stop', function (req, res, next) {
   var archiveId = req.params.archiveId;
   console.log('attempting to stop archive: ' + archiveId);
-  opentok.stopArchive(archiveId, function(err, archive) {
+  opentok.stopArchive(archiveId, function (err, archive) {
     if (err) {
       console.log(err);
-      res.status(500).send({error: 'stopArchive error:', err});
+      res.status(500).send({ error: 'stopArchive error:', err });
       return;
     }
     res.setHeader('Content-Type', 'application/json');
@@ -148,41 +147,40 @@ A `GET` request to `'/archive/:archiveId/view'` redirects the requested clients 
 a URL where the archive gets played.
 
 ```javascript
-router.get('/archive/:archiveId/view', function(req, res, next) {
+router.get('/archive/:archiveId/view', function (req, res, next) {
   var archiveId = req.params.archiveId;
   console.log('attempting to view archive: ' + archiveId);
-  opentok.getArchive(archiveId, function(err, archive) {
+  opentok.getArchive(archiveId, function (err, archive) {
     if (err) {
       console.log(err);
-      res.status(500).send({error: 'viewArchive error:', err});
+      res.status(500).send({ error: 'viewArchive error:', err });
       return;
     }
 
     if (archive.status == 'available') {
-      res.redirect(archive.url); 
-    }
-    else {
+      res.redirect(archive.url);
+    } else {
       res.render('view', { title: 'Archiving Pending' });
     }
   });
 });
-``` 
+```
 
 ### Get Archive information
 
 A `GET` request to `/archive/:archiveId` returns a JSON object that contains all archive properties, including `status`, `url`, `duration`, etc. For more information, see [here](https://tokbox.com/developer/sdks/node/reference/Archive.html).
 
 ```javascript
-router.get('/archive/:archiveId', function(req, res, next) {
+router.get('/archive/:archiveId', function (req, res, next) {
   var sessionId = req.params.sessionId;
   var archiveId = req.params.archiveId;
-  
+
   // fetch archive
   console.log('attempting to fetch archive: ' + archiveId);
-  opentok.getArchive(archiveId, function(err, archive) {
+  opentok.getArchive(archiveId, function (err, archive) {
     if (err) {
       console.log(err);
-      res.status(500).send({error: 'infoArchive error:', err});
+      res.status(500).send({ error: 'infoArchive error:', err });
       return;
     }
 
@@ -198,6 +196,7 @@ router.get('/archive/:archiveId', function(req, res, next) {
 A `GET` request to `/archive` with optional `count` and `offset` params returns a list of JSON archive objects. For more information, please check [here](https://tokbox.com/developer/sdks/node/reference/OpenTok.html#listArchives).
 
 Examples:
+
 ```javascript
 GET /archive // fetch up to 1000 archive objects
 GET /archive?count=10  // fetch the first 10 archive objects
@@ -211,10 +210,10 @@ This sample app does not provide client-side OpenTok functionality
 (for connecting to OpenTok sessions and for publishing and subscribing to streams).
 It is intended to be used with the OpenTok tutorials for Web, iOS, iOS-Swift, or Android:
 
-* [Web](https://tokbox.com/developer/tutorials/web/basic-video-chat/)
-* [iOS](https://tokbox.com/developer/tutorials/ios/basic-video-chat/)
-* [iOS-Swift](https://tokbox.com/developer/tutorials/ios/swift/basic-video-chat/)
-* [Android](https://tokbox.com/developer/tutorials/android/basic-video-chat/)
+- [Web](https://tokbox.com/developer/tutorials/web/basic-video-chat/)
+- [iOS](https://tokbox.com/developer/tutorials/ios/basic-video-chat/)
+- [iOS-Swift](https://tokbox.com/developer/tutorials/ios/swift/basic-video-chat/)
+- [Android](https://tokbox.com/developer/tutorials/android/basic-video-chat/)
 
 ## Development and Contributing
 

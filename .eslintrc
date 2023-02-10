@@ -1,7 +1,40 @@
 {
-  "extends": "airbnb-base/legacy",
+  "root": true,
+  "env": {
+    "es6": true,
+    "es2021": true,
+    "node": true
+  },
+  "extends": ["eslint:recommended", "google", "prettier"],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "plugins": ["deprecation", "prettier"],
   "rules": {
-    "no-restricted-syntax": ["off", "ForInStatement"],
-    "no-console": ["error", { "allow": ["log", "error"] }]
+    "semi": "warn",
+    "comma-dangle": "warn",
+    "curly": ["error", "all"],
+    "indent": ["error", 2],
+    "object-curly-spacing": [
+      "error",
+      "always",
+      {
+        "objectsInObjects": true,
+        "arraysInObjects": true
+      }
+    ],
+    "require-jsdoc": ["off"],
+    "operator-linebreak": ["error", "before"],
+    "max-len": [
+      "error",
+      {
+        "code": 120,
+        "ignoreUrls": true,
+        "ignoreTemplateLiterals": true,
+        "ignoreRegExpLiterals": true,
+        "ignorePattern": "^import.+|test"
+      }
+    ]
   }
 }
