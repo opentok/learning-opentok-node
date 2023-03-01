@@ -25,7 +25,9 @@
     "prettier": "2.8.1",
     "prettier-eslint": "15.0.1",
     "serve-favicon": "~2.5.0",
-    "uglify-js": "^3.13.4"
+    "uglify-js": "^3.13.4",
+    "axios": "1.3.4",
+    "opentok-jwt": "0.1.5"
   },
   "devDependencies": {
     "eslint-plugin-deprecation": "^1.3.3",

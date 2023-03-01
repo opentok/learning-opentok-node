@@ -2,10 +2,18 @@ const express = require('express');
 // eslint-disable-next-line new-cap
 const router = express.Router();
 const path = require('path');
+const axios = require('axios');
+const { projectToken } = require('opentok-jwt');
 const _ = require('lodash');
+const bodyParser = require('body-parser');
 
 const apiKey = process.env.TOKBOX_API_KEY;
 const secret = process.env.TOKBOX_SECRET;
+
+const captionsUrl = 'https://api.opentok.com/v2/project';
+
+const postBodyParser = bodyParser.json();
+bodyParser.raw();
 
 if (!apiKey || !secret) {
   console.error('='.repeat('80'));
@@ -29,6 +37,8 @@ const opentok = new OpenTok(apiKey, secret);
 // application you should consider a more persistent storage
 
 const roomToSessionIdDictionary = {};
+
+let captionResponse;
 
 // returns the room name, given a session ID that was associated with it
 function findRoomFromSessionId(sessionId) {
@@ -61,6 +71,10 @@ router.get('/room/:name', function (req, res) {
   if (roomToSessionIdDictionary[roomName]) {
     sessionId = roomToSessionIdDictionary[roomName];
 
+    const tokenOptions = {};
+    // we need caption to be moderator role for captions to work
+    tokenOptions.role = "moderator";
+
     // generate token
     token = opentok.generateToken(sessionId);
     res.setHeader('Content-Type', 'application/json');
@@ -85,8 +99,11 @@ router.get('/room/:name', function (req, res) {
       // you should use a more persistent storage for them
       roomToSessionIdDictionary[roomName] = session.sessionId;
 
+      const tokenOptions = {};
+      // we need the token role to be moderator for captions to work
+      tokenOptions.role = "moderator";
       // generate token
-      token = opentok.generateToken(session.sessionId);
+      token = opentok.generateToken(session.sessionId, tokenOptions);
       res.setHeader('Content-Type', 'application/json');
       res.send({
         apiKey: apiKey,
@@ -95,6 +112,69 @@ router.get('/room/:name', function (req, res) {
       });
     });
   }
+});
+
+/**
+ * POST /captions/start
+ */
+router.post('/captions/start', async function (req, res) {
+  // With custom expiry (Default 30 days)
+  const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
+  const projectJWT = projectToken(apiKey, secret, expires);
+  const captionURL = `${captionsUrl}/${apiKey}/captions`;
+
+  const captionPostBody = {
+    sessionId: req.body.sessionId,
+    token: req.body.token,
+    languageCode: 'en-US',
+    maxDuration: 36000,
+    partialCaptions: 'true',
+  };
+
+  try {
+    captionResponse = await axios.post(captionURL, captionPostBody, {
+      headers: {
+        'X-OPENTOK-AUTH': projectJWT,
+        'Content-Type': 'application/json',
+      },
+    });
+  } catch (err) {
+    console.warn(err);
+    res.status(500);
+    res.send(`Error starting transcription services: ${err}`);
+    return;
+  }
+
+  res.send(captionResponse.data.captionsId);
+});
+
+/**
+ * POST /captions/stop
+ */
+router.post('/captions/stop', postBodyParser, async function (req, res) {
+  const captionsId = req.body.captionId;
+
+  // With custom expiry (Default 30 days)
+  const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
+  const projectJWT = projectToken(apiKey, secret, expires);
+
+  const captionURL = `${captionsUrl}/${apiKey}/captions/${captionsId}/stop`;
+
+  try {
+    captionResponse = await axios.post(captionURL, {}, {
+      headers: {
+        'X-OPENTOK-AUTH': projectJWT,
+        'Content-Type': 'application/json',
+      },
+    });
+  } catch (err) {
+    console.warn(err);
+    res.status(500);
+    res.send(`Error stopping transcription services: ${err}`);
+    return;
+  }
+
+  res.sendStatus(captionResponse.status);
 });
 
 /**
