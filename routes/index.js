@@ -38,8 +38,6 @@ const opentok = new OpenTok(apiKey, secret);
 
 const roomToSessionIdDictionary = {};
 
-let captionResponse;
-
 // returns the room name, given a session ID that was associated with it
 function findRoomFromSessionId(sessionId) {
   return _.findKey(roomToSessionIdDictionary, function (value) {
@@ -65,18 +63,19 @@ router.get('/room/:name', function (req, res) {
   const roomName = req.params.name;
   let sessionId;
   let token;
+
+  const tokenOptions = {};
+  // we need caption to be moderator role for captions to work
+  tokenOptions.role = "moderator";
+
   console.log('attempting to create a session associated with the room: ' + roomName);
 
   // if the room name is associated with a session ID, fetch that
   if (roomToSessionIdDictionary[roomName]) {
     sessionId = roomToSessionIdDictionary[roomName];
 
-    const tokenOptions = {};
-    // we need caption to be moderator role for captions to work
-    tokenOptions.role = "moderator";
-
     // generate token
-    token = opentok.generateToken(sessionId);
+    token = opentok.generateToken(sessionId, tokenOptions);
     res.setHeader('Content-Type', 'application/json');
     res.send({
       apiKey: apiKey,
@@ -99,9 +98,6 @@ router.get('/room/:name', function (req, res) {
       // you should use a more persistent storage for them
       roomToSessionIdDictionary[roomName] = session.sessionId;
 
-      const tokenOptions = {};
-      // we need the token role to be moderator for captions to work
-      tokenOptions.role = "moderator";
       // generate token
       token = opentok.generateToken(session.sessionId, tokenOptions);
       res.setHeader('Content-Type', 'application/json');
@@ -132,20 +128,19 @@ router.post('/captions/start', async function (req, res) {
   };
 
   try {
-    captionResponse = await axios.post(captionURL, captionPostBody, {
+    const captionResponse = await axios.post(captionURL, captionPostBody, {
       headers: {
         'X-OPENTOK-AUTH': projectJWT,
         'Content-Type': 'application/json',
       },
     });
+    res.send(captionResponse.data.captionsId);
   } catch (err) {
     console.warn(err);
     res.status(500);
     res.send(`Error starting transcription services: ${err}`);
     return;
   }
-
-  res.send(captionResponse.data.captionsId);
 });
 
 /**
@@ -161,20 +156,19 @@ router.post('/captions/stop', postBodyParser, async function (req, res) {
   const captionURL = `${captionsUrl}/${apiKey}/captions/${captionsId}/stop`;
 
   try {
-    captionResponse = await axios.post(captionURL, {}, {
+    const captionResponse = await axios.post(captionURL, {}, {
       headers: {
         'X-OPENTOK-AUTH': projectJWT,
         'Content-Type': 'application/json',
       },
     });
+    res.sendStatus(captionResponse.status);
   } catch (err) {
     console.warn(err);
     res.status(500);
     res.send(`Error stopping transcription services: ${err}`);
     return;
   }
-
-  res.sendStatus(captionResponse.status);
 });
 
 /**
