@@ -10,7 +10,7 @@ const bodyParser = require('body-parser');
 const apiKey = process.env.TOKBOX_API_KEY;
 const secret = process.env.TOKBOX_SECRET;
 
-const captionsUrl = 'https://api.opentok.com/v2/project';
+const opentokUrl = 'https://api.opentok.com/v2/project';
 
 const postBodyParser = bodyParser.json();
 bodyParser.raw();
@@ -117,7 +117,7 @@ router.post('/captions/start', async function (req, res) {
   // With custom expiry (Default 30 days)
   const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
   const projectJWT = projectToken(apiKey, secret, expires);
-  const captionURL = `${captionsUrl}/${apiKey}/captions`;
+  const captionURL = `${opentokUrl}/${apiKey}/captions`;
 
   const captionPostBody = {
     sessionId: req.body.sessionId,
@@ -153,7 +153,7 @@ router.post('/captions/stop', postBodyParser, async function (req, res) {
   const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
   const projectJWT = projectToken(apiKey, secret, expires);
 
-  const captionURL = `${captionsUrl}/${apiKey}/captions/${captionsId}/stop`;
+  const captionURL = `${opentokUrl}/${apiKey}/captions/${captionsId}/stop`;
 
   try {
     const captionResponse = await axios.post(captionURL, {}, {
@@ -286,7 +286,7 @@ router.post('/render', async function (req, res) {
   // With custom expiry (Default 30 days)
   const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
   const projectJWT = projectToken(apiKey, secret, expires);
-  const renderURL = `${captionsUrl}/${apiKey}/render`;
+  const renderURL = `${opentokUrl}/${apiKey}/render`;
 
   const renderPostBody = {
     sessionId: req.body.sessionId,
@@ -324,7 +324,7 @@ router.get('/render/info', async function (req, res) {
   const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
   const projectJWT = projectToken(apiKey, secret, expires);
 
-  const renderURL = `${captionsUrl}/${apiKey}/render/${renderId}`;
+  const renderURL = `${opentokUrl}/${apiKey}/render/${renderId}`;
 
   try {
     const renderResponse = await axios.get(renderURL, {
@@ -352,7 +352,7 @@ router.get('/render/list', async function (req, res) {
   const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
   const projectJWT = projectToken(apiKey, secret, expires);
 
-  const renderURL = `${captionsUrl}/${apiKey}/render?count=${count}`;
+  const renderURL = `${opentokUrl}/${apiKey}/render?count=${count}`;
 
   try {
     const renderResponse = await axios.get(renderURL, {
@@ -379,7 +379,7 @@ router.delete('/render/stop', postBodyParser, async function (req, res) {
   // With custom expiry (Default 30 days)
   const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
   const projectJWT = projectToken(apiKey, secret, expires);
-  const renderURL = `${captionsUrl}/${apiKey}/render/${renderId}/`;
+  const renderURL = `${opentokUrl}/${apiKey}/render/${renderId}/`;
   try {
     const renderResponse = await axios.delete(renderURL, {
       headers: {
