@@ -204,6 +204,76 @@ GET /archive?offset=10  // fetch archives but first 10 archive objetcs
 GET /archive?count=10&offset=10 // fetch 10 archive objects starting from 11st
 ```
 
+### Start [Captions](https://tokbox.com/developer/guides/live-captions/)
+
+A `POST` request to the `/captions/start` route starts caption transcribing of an OpenTok session.
+The session ID and a token is passed in as JSON data in the body of the request.
+
+```javascript
+router.post('/captions/start', async function (req, res) {
+  // With custom expiry (Default 30 days)
+  const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
+  const projectJWT = projectToken(apiKey, secret, expires);
+  const captionURL = `${captionsUrl}/${apiKey}/captions`;
+
+  const captionPostBody = {
+    sessionId: req.body.sessionId,
+    token: req.body.token,
+    languageCode: 'en-US',
+    maxDuration: 36000,
+    partialCaptions: 'true',
+  };
+
+  try {
+    captionResponse = await axios.post(captionURL, captionPostBody, {
+      headers: {
+        'X-OPENTOK-AUTH': projectJWT,
+        'Content-Type': 'application/json',
+      },
+    });
+  } catch (err) {
+    console.warn(err);
+    res.status(500);
+    res.send(`Error starting transcription services: ${err}`);
+    return;
+  }
+
+  res.send(captionResponse.data.captionsId);
+});
+```
+### Stop [Captions](https://tokbox.com/developer/guides/live-captions/)
+
+A `POST` request to the `/captions/stop` route stops caption transcribing of an OpenTok session.
+The caption ID is passed in as JSON data in the body of the request.
+
+```javascript
+router.post('/captions/stop', postBodyParser, async function (req, res) {
+  const captionsId = req.body.captionId;
+
+  // With custom expiry (Default 30 days)
+  const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
+  const projectJWT = projectToken(apiKey, secret, expires);
+
+  const captionURL = `${captionsUrl}/${apiKey}/captions/${captionsId}/stop`;
+
+  try {
+    captionResponse = await axios.post(captionURL, {}, {
+      headers: {
+        'X-OPENTOK-AUTH': projectJWT,
+        'Content-Type': 'application/json',
+      },
+    });
+  } catch (err) {
+    console.warn(err);
+    res.status(500);
+    res.send(`Error stopping transcription services: ${err}`);
+    return;
+  }
+
+  res.sendStatus(captionResponse.status);
+});
+```
+
 ## More information
 
 This sample app does not provide client-side OpenTok functionality

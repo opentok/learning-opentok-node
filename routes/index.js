@@ -63,6 +63,11 @@ router.get('/room/:name', function (req, res) {
   const roomName = req.params.name;
   let sessionId;
   let token;
+
+  const tokenOptions = {};
+  // we need caption to be moderator role for captions to work
+  tokenOptions.role = "moderator";
+
   console.log('attempting to create a session associated with the room: ' + roomName);
 
   // if the room name is associated with a session ID, fetch that
@@ -70,7 +75,7 @@ router.get('/room/:name', function (req, res) {
     sessionId = roomToSessionIdDictionary[roomName];
 
     // generate token
-    token = opentok.generateToken(sessionId);
+    token = opentok.generateToken(sessionId, tokenOptions);
     res.setHeader('Content-Type', 'application/json');
     res.send({
       apiKey: apiKey,
@@ -94,7 +99,7 @@ router.get('/room/:name', function (req, res) {
       roomToSessionIdDictionary[roomName] = session.sessionId;
 
       // generate token
-      token = opentok.generateToken(session.sessionId);
+      token = opentok.generateToken(session.sessionId, tokenOptions);
       res.setHeader('Content-Type', 'application/json');
       res.send({
         apiKey: apiKey,
@@ -102,6 +107,67 @@ router.get('/room/:name', function (req, res) {
         token: token,
       });
     });
+  }
+});
+
+/**
+ * POST /captions/start
+ */
+router.post('/captions/start', async function (req, res) {
+  // With custom expiry (Default 30 days)
+  const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
+  const projectJWT = projectToken(apiKey, secret, expires);
+  const captionURL = `${captionsUrl}/${apiKey}/captions`;
+
+  const captionPostBody = {
+    sessionId: req.body.sessionId,
+    token: req.body.token,
+    languageCode: 'en-US',
+    maxDuration: 36000,
+    partialCaptions: 'true',
+  };
+
+  try {
+    const captionResponse = await axios.post(captionURL, captionPostBody, {
+      headers: {
+        'X-OPENTOK-AUTH': projectJWT,
+        'Content-Type': 'application/json',
+      },
+    });
+    res.send(captionResponse.data.captionsId);
+  } catch (err) {
+    console.warn(err);
+    res.status(500);
+    res.send(`Error starting transcription services: ${err}`);
+    return;
+  }
+});
+
+/**
+ * POST /captions/stop
+ */
+router.post('/captions/stop', postBodyParser, async function (req, res) {
+  const captionsId = req.body.captionId;
+
+  // With custom expiry (Default 30 days)
+  const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
+  const projectJWT = projectToken(apiKey, secret, expires);
+
+  const captionURL = `${captionsUrl}/${apiKey}/captions/${captionsId}/stop`;
+
+  try {
+    const captionResponse = await axios.post(captionURL, {}, {
+      headers: {
+        'X-OPENTOK-AUTH': projectJWT,
+        'Content-Type': 'application/json',
+      },
+    });
+    res.sendStatus(captionResponse.status);
+  } catch (err) {
+    console.warn(err);
+    res.status(500);
+    res.send(`Error stopping transcription services: ${err}`);
+    return;
   }
 });
 
