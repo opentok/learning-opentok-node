@@ -144,10 +144,10 @@ router.post('/captions/start', async function (req, res) {
 });
 
 /**
- * POST /captions/stop
+ * POST /captions/:captionsId/stop
  */
-router.post('/captions/stop', postBodyParser, async function (req, res) {
-  const captionsId = req.body.captionId;
+router.post('/captions/:captionsId/stop', postBodyParser, async function (req, res) {
+  const captionsId = req.params.captionsId;
 
   // With custom expiry (Default 30 days)
   const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
