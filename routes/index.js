@@ -116,7 +116,7 @@ router.get('/room/:name', function (req, res) {
  */
 router.post('/captions/start', async function (req, res) {
   if (captionsId) {
-    return;
+    return captionsId;
   }
     
   // With custom expiry (Default 30 days)
@@ -140,7 +140,6 @@ router.post('/captions/start', async function (req, res) {
       },
     });
     captionsId = captionResponse.data.captionsId;
-    console.log('captionsID start ' + captionsId);
     res.send(captionsId);
   } catch (err) {
     console.warn(err);
@@ -153,7 +152,7 @@ router.post('/captions/start', async function (req, res) {
 /**
  * POST /captions/stop
  */
-router.post('/captions/stop', postBodyParser, async function (req, res) {
+router.post('/captions/:captionsId/stop', postBodyParser, async function (req, res) {
   // With custom expiry (Default 30 days)
   const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
   const projectJWT = projectToken(apiKey, secret, expires);
