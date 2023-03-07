@@ -154,10 +154,6 @@ router.post('/captions/start', async function (req, res) {
  * POST /captions/stop
  */
 router.post('/captions/stop', postBodyParser, async function (req, res) {
-
-  console.log(captionsId);
-  // const captionsId = req.params.captionsId;
-
   // With custom expiry (Default 30 days)
   const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
   const projectJWT = projectToken(apiKey, secret, expires);
