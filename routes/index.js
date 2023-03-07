@@ -11,6 +11,7 @@ const apiKey = process.env.TOKBOX_API_KEY;
 const secret = process.env.TOKBOX_SECRET;
 
 const captionsUrl = 'https://api.opentok.com/v2/project';
+let captionsId; 
 
 const postBodyParser = bodyParser.json();
 bodyParser.raw();
@@ -114,6 +115,10 @@ router.get('/room/:name', function (req, res) {
  * POST /captions/start
  */
 router.post('/captions/start', async function (req, res) {
+  if (captionsId) {
+    return;
+  }
+    
   // With custom expiry (Default 30 days)
   const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
   const projectJWT = projectToken(apiKey, secret, expires);
@@ -134,7 +139,9 @@ router.post('/captions/start', async function (req, res) {
         'Content-Type': 'application/json',
       },
     });
-    res.send(captionResponse.data.captionsId);
+    captionsId = captionResponse.data.captionsId;
+    console.log('captionsID start ' + captionsId);
+    res.send(captionsId);
   } catch (err) {
     console.warn(err);
     res.status(500);
@@ -144,10 +151,12 @@ router.post('/captions/start', async function (req, res) {
 });
 
 /**
- * POST /captions/:captionsId/stop
+ * POST /captions/stop
  */
-router.post('/captions/:captionsId/stop', postBodyParser, async function (req, res) {
-  const captionsId = req.params.captionsId;
+router.post('/captions/stop', postBodyParser, async function (req, res) {
+
+  console.log(captionsId);
+  // const captionsId = req.params.captionsId;
 
   // With custom expiry (Default 30 days)
   const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
