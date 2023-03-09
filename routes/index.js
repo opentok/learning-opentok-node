@@ -279,10 +279,7 @@ router.get('/archive', function (req, res) {
   });
 });
 
-/**
- * POST /render
- */
-router.post('/render', async function (req, res) {
+router.post('/render', async (req, res) => {
   // With custom expiry (Default 30 days)
   const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
   const projectJWT = projectToken(apiKey, secret, expires);
@@ -314,10 +311,7 @@ router.post('/render', async function (req, res) {
   }
 });
 
-/**
- * GET /render/info
- */
-router.get('/render/info', async function (req, res) {
+router.get('/render/info', async (req, res) => {
   const renderId = req.body.id;
 
   // With custom expiry (Default 30 days)
@@ -342,10 +336,7 @@ router.get('/render/info', async function (req, res) {
   }
 });
 
-/**
- * GET /render/list
- */
-router.get('/render/list', async function (req, res) {
+router.get('/render/list', async (req, res) => {
   const count = req.body.count;
 
   // With custom expiry (Default 30 days)
@@ -370,10 +361,7 @@ router.get('/render/list', async function (req, res) {
   }
 });
 
-/**
- * DELETE /render/stop
- */
-router.delete('/render/stop', postBodyParser, async function (req, res) {
+router.delete('/render/stop', postBodyParser, async (req, res) => {
   const renderId = req.body.id;
 
   // With custom expiry (Default 30 days)
