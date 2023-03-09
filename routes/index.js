@@ -10,7 +10,7 @@ const bodyParser = require('body-parser');
 const apiKey = process.env.TOKBOX_API_KEY;
 const secret = process.env.TOKBOX_SECRET;
 
-const captionsUrl = 'https://api.opentok.com/v2/project';
+const opentokUrl = 'https://api.opentok.com/v2/project';
 let captionsId; 
 
 const postBodyParser = bodyParser.json();
@@ -122,7 +122,7 @@ router.post('/captions/start', async function (req, res) {
   // With custom expiry (Default 30 days)
   const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
   const projectJWT = projectToken(apiKey, secret, expires);
-  const captionURL = `${captionsUrl}/${apiKey}/captions`;
+  const captionURL = `${opentokUrl}/${apiKey}/captions`;
 
   const captionPostBody = {
     sessionId: req.body.sessionId,
@@ -157,7 +157,7 @@ router.post('/captions/stop', postBodyParser, async function (req, res) {
   const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
   const projectJWT = projectToken(apiKey, secret, expires);
 
-  const captionURL = `${captionsUrl}/${apiKey}/captions/${captionsId}/stop`;
+  const captionURL = `${opentokUrl}/${apiKey}/captions/${captionsId}/stop`;
 
   try {
     const captionResponse = await axios.post(captionURL, {}, {
@@ -282,6 +282,111 @@ router.get('/archive', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
     res.send(archives);
   });
+});
+
+router.post('/render', async (req, res) => {
+  // With custom expiry (Default 30 days)
+  const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
+  const projectJWT = projectToken(apiKey, secret, expires);
+  const renderURL = `${opentokUrl}/${apiKey}/render`;
+
+  const renderPostBody = {
+    sessionId: req.body.sessionId,
+    token: req.body.token,
+    "url": "https://www.google.com",
+    maxDuration: 36000,
+    "resolution": "1280x720",
+    "properties": {
+      name: "Composed stream for Live event",
+    },
+  };
+  try {
+    const renderResponse = await axios.post(renderURL, renderPostBody, {
+      headers: {
+        'X-OPENTOK-AUTH': projectJWT,
+        'Content-Type': 'application/json',
+      },
+    });
+    res.send(renderResponse.data.id);
+  } catch (err) {
+    console.warn(err);
+    res.status(500);
+    res.send(`Error starting Experience Composer: ${err}`);
+    return;
+  }
+});
+
+router.get('/render/info', async (req, res) => {
+  const renderId = req.body.id;
+
+  // With custom expiry (Default 30 days)
+  const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
+  const projectJWT = projectToken(apiKey, secret, expires);
+
+  const renderURL = `${opentokUrl}/${apiKey}/render/${renderId}`;
+
+  try {
+    const renderResponse = await axios.get(renderURL, {
+      headers: {
+        'X-OPENTOK-AUTH': projectJWT,
+        'Content-Type': 'application/json',
+      },
+    }, {});
+    res.sendStatus(renderResponse.status);
+  } catch (err) {
+    console.warn(err);
+    res.status(err.status);
+    res.send(`Error retrieving composer information: ${err}`);
+    return;
+  }
+});
+
+router.get('/render/list', async (req, res) => {
+  const count = req.body.count;
+
+  // With custom expiry (Default 30 days)
+  const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
+  const projectJWT = projectToken(apiKey, secret, expires);
+
+  const renderURL = `${opentokUrl}/${apiKey}/render?count=${count}`;
+
+  try {
+    const renderResponse = await axios.get(renderURL, {
+      headers: {
+        'X-OPENTOK-AUTH': projectJWT,
+        'Content-Type': 'application/json',
+      },
+    }, {});
+    res.sendStatus(renderResponse.status);
+  } catch (err) {
+    console.warn(err);
+    res.status(err.response.status);
+    res.send(`Error retrieving composer information: ${err}`);
+    return;
+  }
+});
+
+router.delete('/render/stop', postBodyParser, async (req, res) => {
+  const renderId = req.body.id;
+
+  // With custom expiry (Default 30 days)
+  const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
+  const projectJWT = projectToken(apiKey, secret, expires);
+  const renderURL = `${opentokUrl}/${apiKey}/render/${renderId}/`;
+  try {
+    const renderResponse = await axios.delete(renderURL, {
+      headers: {
+        'Content-Type': 'application/json',
+        'X-OPENTOK-AUTH': projectJWT,
+      },
+    }, {});
+    res.sendStatus(renderResponse.status);
+  } catch (err) {
+    console.warn(err);
+    res.status(err.response.status);
+    res.send(`Error stopping the composer: ${err}`);
+    return;
+  }
 });
 
 module.exports = router;
