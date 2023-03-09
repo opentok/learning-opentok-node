@@ -167,6 +167,7 @@ router.post('/captions/stop', postBodyParser, async function (req, res) {
       },
     });
     res.sendStatus(captionResponse.status);
+    captionsId = '';
   } catch (err) {
     console.warn(err);
     res.status(500);
