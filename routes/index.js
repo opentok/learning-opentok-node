@@ -11,7 +11,6 @@ const apiKey = process.env.TOKBOX_API_KEY;
 const secret = process.env.TOKBOX_SECRET;
 
 const opentokUrl = 'https://api.opentok.com/v2/project';
-let captionsId; 
 
 const postBodyParser = bodyParser.json();
 bodyParser.raw();
@@ -32,12 +31,19 @@ if (!apiKey || !secret) {
 const OpenTok = require('opentok');
 const opentok = new OpenTok(apiKey, secret);
 
-// IMPORTANT: roomToSessionIdDictionary is a variable that associates room names with unique
+// IMPORTANT: roomToSessionIdDictionary is a variable that associates room names with
 // unique session IDs. However, since this is stored in memory, restarting your server will
-// reset these values if you want to have a room-to-session association in your production
+// reset these values. If you want to have a room-to-session association in your production
 // application you should consider a more persistent storage
 
 const roomToSessionIdDictionary = {};
+
+// IMPORTANT: sessionIdToCaptionsIdDictionary is a variable that associates session IDs with
+// unique caption IDs. However, since this is stored in memory, restarting your server will
+// reset these values. If you want to have a session-to-captions association in your production
+// application you should consider a more persistent storage
+
+const sessionIdToCaptionsIdDictionary = {}; 
 
 // returns the room name, given a session ID that was associated with it
 function findRoomFromSessionId(sessionId) {
@@ -111,21 +117,20 @@ router.get('/room/:name', function (req, res) {
   }
 });
 
-/**
- * POST /captions/start
- */
-router.post('/captions/start', async function (req, res) {
-  if (captionsId) {
-    return captionsId;
+router.post('/captions/start', async (req, res) => {
+  const sessionId = req.body.sessionId;
+  if (sessionIdToCaptionsIdDictionary[sessionId]) {
+    res.send(`Captions are already enabled for: ${sessionId}`);
+    return;
   }
-    
+
   // With custom expiry (Default 30 days)
   const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
   const projectJWT = projectToken(apiKey, secret, expires);
   const captionURL = `${opentokUrl}/${apiKey}/captions`;
 
   const captionPostBody = {
-    sessionId: req.body.sessionId,
+    sessionId,
     token: req.body.token,
     languageCode: 'en-US',
     maxDuration: 36000,
@@ -139,7 +144,13 @@ router.post('/captions/start', async function (req, res) {
         'Content-Type': 'application/json',
       },
     });
-    captionsId = captionResponse.data.captionsId;
+
+    const captionsId = captionResponse.data.captionsId;
+
+    // IMPORTANT: Because this is stored in memory, restarting your server will reset these values
+    // if you want to store a session-to-captions association in your production application
+    // you should use a more persistent storage for them
+    sessionIdToCaptionsIdDictionary[sessionId] = captionsId;
     res.send(captionsId);
   } catch (err) {
     console.warn(err);
@@ -149,10 +160,16 @@ router.post('/captions/start', async function (req, res) {
   }
 });
 
-/**
- * POST /captions/stop
- */
-router.post('/captions/stop', postBodyParser, async function (req, res) {
+router.post('/captions/stop', postBodyParser, async (req, res) => {
+  const sessionId = req.body.sessionId;
+  const captionsId = sessionIdToCaptionsIdDictionary[sessionId];
+
+  if (captionsId === undefined) {
+    res.status(500);
+    res.send(`Captions are not enabled for: ${sessionId}`);
+    return;
+  }
+
   // With custom expiry (Default 30 days)
   const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
   const projectJWT = projectToken(apiKey, secret, expires);
@@ -167,7 +184,7 @@ router.post('/captions/stop', postBodyParser, async function (req, res) {
       },
     });
     res.sendStatus(captionResponse.status);
-    captionsId = '';
+    delete sessionIdToCaptionsIdDictionary[sessionId];
   } catch (err) {
     console.warn(err);
     res.status(500);
