@@ -38,13 +38,6 @@ const opentok = new OpenTok(apiKey, secret);
 
 const roomToSessionIdDictionary = {};
 
-// IMPORTANT: sessionIdToCaptionsIdDictionary is a variable that associates session IDs with
-// unique caption IDs. However, since this is stored in memory, restarting your server will
-// reset these values. If you want to have a session-to-captions association in your production
-// application you should consider a more persistent storage
-
-const sessionIdToCaptionsIdDictionary = {}; 
-
 // returns the room name, given a session ID that was associated with it
 function findRoomFromSessionId(sessionId) {
   return _.findKey(roomToSessionIdDictionary, function (value) {
@@ -119,10 +112,6 @@ router.get('/room/:name', function (req, res) {
 
 router.post('/captions/start', async (req, res) => {
   const sessionId = req.body.sessionId;
-  if (sessionIdToCaptionsIdDictionary[sessionId]) {
-    res.send(`Captions are already enabled for: ${sessionId}`);
-    return;
-  }
 
   // With custom expiry (Default 30 days)
   const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
@@ -146,12 +135,7 @@ router.post('/captions/start', async (req, res) => {
     });
 
     const captionsId = captionResponse.data.captionsId;
-
-    // IMPORTANT: Because this is stored in memory, restarting your server will reset these values
-    // if you want to store a session-to-captions association in your production application
-    // you should use a more persistent storage for them
-    sessionIdToCaptionsIdDictionary[sessionId] = captionsId;
-    res.send(captionsId);
+    res.send({ id: captionsId });
   } catch (err) {
     console.warn(err);
     res.status(500);
@@ -160,15 +144,8 @@ router.post('/captions/start', async (req, res) => {
   }
 });
 
-router.post('/captions/stop', postBodyParser, async (req, res) => {
-  const sessionId = req.body.sessionId;
-  const captionsId = sessionIdToCaptionsIdDictionary[sessionId];
-
-  if (captionsId === undefined) {
-    res.status(500);
-    res.send(`Captions are not enabled for: ${sessionId}`);
-    return;
-  }
+router.post('/captions/:captionsId/stop', postBodyParser, async (req, res) => {
+  const captionsId = req.params.captionsId;
 
   // With custom expiry (Default 30 days)
   const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
@@ -184,7 +161,6 @@ router.post('/captions/stop', postBodyParser, async (req, res) => {
       },
     });
     res.sendStatus(captionResponse.status);
-    delete sessionIdToCaptionsIdDictionary[sessionId];
   } catch (err) {
     console.warn(err);
     res.status(500);
@@ -311,7 +287,7 @@ router.post('/render', async (req, res) => {
     sessionId: req.body.sessionId,
     token: req.body.token,
     "url": "https://www.google.com",
-    maxDuration: 36000,
+    maxDuration: 14400,
     "resolution": "1280x720",
     "properties": {
       name: "Composed stream for Live event",
