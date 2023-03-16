@@ -287,7 +287,7 @@ router.post('/render', async (req, res) => {
     sessionId: req.body.sessionId,
     token: req.body.token,
     "url": "https://www.google.com",
-    maxDuration: 14400,
+    maxDuration: 36000,
     "resolution": "1280x720",
     "properties": {
       name: "Composed stream for Live event",
