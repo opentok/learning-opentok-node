@@ -254,34 +254,33 @@ router.post('/captions/start', async function (req, res) {
 ```
 ### Stop [Captions](https://tokbox.com/developer/guides/live-captions/)
 
-A `POST` request to the `/captions/stop` route stops caption transcribing of an OpenTok session.
-The caption ID is passed in as JSON data in the body of the request.
+A `POST` request to the `/captions/:captionsId/stop` route stops caption transcribing of an OpenTok session.
+The captionsID is passed in as a parameter in the URL. 
 
 ```javascript
-router.post('/captions/stop', postBodyParser, async function (req, res) {
-  const captionsId = req.body.captionId;
+router.post('/captions/:captionsId/stop', postBodyParser, async (req, res) => {
+  const captionsId = req.params.captionsId;
 
   // With custom expiry (Default 30 days)
   const expires = Math.floor(new Date() / 1000) + (24 * 60 * 60);
   const projectJWT = projectToken(apiKey, secret, expires);
 
-  const captionURL = `${captionsUrl}/${apiKey}/captions/${captionsId}/stop`;
+  const captionURL = `${opentokUrl}/${apiKey}/captions/${captionsId}/stop`;
 
   try {
-    captionResponse = await axios.post(captionURL, {}, {
+    const captionResponse = await axios.post(captionURL, {}, {
       headers: {
         'X-OPENTOK-AUTH': projectJWT,
         'Content-Type': 'application/json',
       },
     });
+    res.sendStatus(captionResponse.status);
   } catch (err) {
     console.warn(err);
     res.status(500);
     res.send(`Error stopping transcription services: ${err}`);
     return;
   }
-
-  res.sendStatus(captionResponse.status);
 });
 ```
 
