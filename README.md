@@ -231,7 +231,7 @@ router.post('/captions/start', async function (req, res) {
     sessionId: req.body.sessionId,
     token: req.body.token,
     languageCode: 'en-US',
-    maxDuration: 36000,
+    maxDuration: 14400,
     partialCaptions: 'true',
   };
 
