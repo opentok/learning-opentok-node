@@ -174,7 +174,8 @@ router.post('/captions/:captionsId/stop', postBodyParser, async (req, res) => {
 router.post('/archive/start', function (req, res) {
   const json = req.body;
   const sessionId = json.sessionId;
-  opentok.startArchive(sessionId, { name: findRoomFromSessionId(sessionId) }, function (err, archive) {
+  opentok.startArchive(sessionId, { name: findRoomFromSessionId(sessionId), hasAudio: json.hasAudio, hasVideo: json.hasVideo, resolution: json.resolution }, function (err, archive) {
+    console.log('attempting to start archive with parameters:' + json);
     if (err) {
       console.error('error in startArchive');
       console.error(err);
