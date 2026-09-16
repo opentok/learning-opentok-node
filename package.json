@@ -25,7 +25,7 @@
     "opentok": "^2.11.0",
     "opentok-jwt": "0.1.5",
     "prettier": "2.8.1",
-    "prettier-eslint": "15.0.1",
+    "prettier-eslint": "16.0.0",
     "serve-favicon": "~2.5.0",
     "uglify-js": "^3.13.4"
   },
